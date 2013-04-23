@@ -1,0 +1,22 @@
+SHORT-TERM TASKS
+Customizable configuration file headers
+Grouping of options into sections via subinterfaces; section headers; predictable/explicit groups and options sorting on save by persistence providers (also see below)
+Support for options interfaces inside interfaces (getOptions().getInternalOptions())
+Support for collections and arrays of supported option classes
+
+MEDIUM-TERM TASKS
+XML persistence provider
+On-the-fly flushing of configuration file(s) via new Flushable interface
+Optional reload of externally modified configuration files (with user notification)
+More option classes supported by default: all primitive types and their wrapper classes, BigInteger/BigDecimal, etc
+Support for arbitrary classes via String constructor//valueOf()/toString() method
+
+LONG-TERM TASKS
+Multiple persistence providers per options class
+JSON persistence provider
+JDBC persistence provider
+Configuration file versioning/version management (updating defaults, renaming/deleting options, etc, etc)
+Support for arbitrary beans as option classes via reflection
+Support for annotations on option classes (like JAXB or Jackson annotations)
+Support for serialization/deserialization of arbitrary classes via Jackson
+IntelliJ IDEA plug-in

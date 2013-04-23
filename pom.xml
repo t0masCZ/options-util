@@ -25,19 +25,9 @@
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>options-util configuration helper library</name>
+  <name>options-util</name>
+  <description>Annotation-based configuration management library for Java applications</description>
   <url>http://github.com/options-util/options-util</url>
-
-  <developers>
-    <developer>
-      <id>vdenisov</id>
-      <name>Victor Denisov</name>
-      <email>vdenisov@plukh.org</email>
-      <organization>Moscow State University</organization>
-      <organizationUrl>http://oit.cmc.msu.ru</organizationUrl>
-      <timezone>+4</timezone>
-    </developer>
-  </developers>
 
   <licenses>
     <license>
@@ -52,6 +42,19 @@
     <developerConnection>scm:git:https://options-util/options-util.git</developerConnection>
     <url>http://github.com/options-util/options-util</url>
   </scm>
+
+  <developers>
+    <developer>
+      <id>vdenisov</id>
+      <name>Victor Denisov</name>
+      <email>vdenisov@plukh.org</email>
+      <organization>Moscow State University</organization>
+      <organizationUrl>http://oit.cmc.msu.ru</organizationUrl>
+      <timezone>+4</timezone>
+    </developer>
+  </developers>
+
+
 
 
   <properties>
@@ -75,9 +78,11 @@
 
   <build>
     <plugins>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
+        <version>2.3.2</version>
         <configuration>
           <archive>
             <manifest>
@@ -86,15 +91,79 @@
           </archive>
         </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <show>public</show>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>release-sign-artifacts</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.4</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
