@@ -371,6 +371,8 @@ public class OptionsFactory {
         AbstractOption.registerOptionClassForType(Boolean.class, BooleanOption.class);
         AbstractOption.registerOptionClassForType(String.class, StringOption.class);
         AbstractOption.registerOptionClassForType(Date.class, DateOption.class);
+        AbstractOption.registerOptionClassForType(double.class, DoubleOption.class);
+        AbstractOption.registerOptionClassForType(Double.class, DoubleOption.class);
     }
 
     protected static void registerStandardCollectionTypes() {
