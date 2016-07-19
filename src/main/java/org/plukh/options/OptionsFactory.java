@@ -95,17 +95,9 @@ public class OptionsFactory {
         fillOptionsMaps(getters, setters, gettersWithOptions, settersWithOptions);
 
         //Get configured persistence provider
-        PersistenceProvider pp;
-        try {
-            pp = getPersistenceProvider(optionsClass);
-        } catch (ProviderConfigurationException e) {
-            //Shouldn't happen, just wrap and throw again
-            throw new OptionsException("Error applying default provider configuration", e);
-        }
-
+        PersistenceProvider pp = getPersistenceProvider(optionsClass);
         //Instantiate handler
         OptionsProxyHandler handler = createHandler(optionsClass, gettersWithOptions, settersWithOptions, pp);
-
         //Instantiate and return proxy object
         return getProxyInstance(optionsClass, handler);
     }
@@ -183,11 +175,10 @@ public class OptionsFactory {
         return gettersToSetters;
     }
 
-    private static String getPropertyName(Method getter, boolean decapitalize) {
+    private static String getPropertyName(Method getter, boolean decapitalize) throws OptionsException {
         Matcher m = GETTER_PATTERN.matcher(getter.getName());
         if (!m.matches()) {
-            //TODO: Add the correct response
-            System.err.println("Wrong name");
+            throw new OptionsException("Can't get property name for " + getter.getName());
         }
         //Use properly decapitalized property name
         return decapitalize ? Introspector.decapitalize(m.group(GROUP_NAME)) : m.group(GROUP_NAME);
@@ -279,7 +270,7 @@ public class OptionsFactory {
         return key.charAt(0);
     }
 
-    private static void setCollectionOptionFromAnnotation(Method getter, org.plukh.options.impl.options.CollectionOption option) {
+    private static void setCollectionOptionFromAnnotation(Method getter, org.plukh.options.impl.options.CollectionOption option) throws OptionsException {
         CollectionOption annotation = getter.getAnnotation(CollectionOption.class);
 
         option.setKey(annotation.key().isEmpty() ? getPropertyName(getter, true) : annotation.key());
@@ -288,7 +279,7 @@ public class OptionsFactory {
         option.setReadOnly(true);
     }
 
-    private static void setScalarOptionFromAnnotation(Method getter, AbstractOption option) {
+    private static void setScalarOptionFromAnnotation(Method getter, AbstractOption option) throws OptionsException {
         Option annotation = getter.getAnnotation(Option.class);
 
         option.setKey(annotation.key().isEmpty() ? getPropertyName(getter, true) : annotation.key());
@@ -299,13 +290,12 @@ public class OptionsFactory {
         option.setReadOnly(annotation.readOnly());
     }
 
-    private static void setOptionFromAnnotation(Method getter, AbstractOption option) {
+    private static void setOptionFromAnnotation(Method getter, AbstractOption option) throws OptionsException {
         if (getter.getAnnotation(Option.class) != null) setScalarOptionFromAnnotation(getter, option);
         else setCollectionOptionFromAnnotation(getter, (org.plukh.options.impl.options.CollectionOption) option);
     }
 
-    private static PersistenceProvider getPersistenceProvider(Class<? extends Options> optionsClass) throws OptionsException,
-            ProviderConfigurationException {
+    private static PersistenceProvider getPersistenceProvider(Class<? extends Options> optionsClass) throws OptionsException {
         PersistenceProvider provider;
 
         //Try to look up @Persistence annotation on options class
@@ -314,10 +304,12 @@ public class OptionsFactory {
 
         try {
             provider = (PersistenceProvider) providerClass.newInstance();
-        } catch (Exception e) {
+            provider.configure(new PersistenceConfig(optionsClass));
+        } catch (InstantiationException | IllegalAccessException e) {
             throw new OptionsException("Error instantiating persistence provider for class: " + providerClass.getName(), e);
+        } catch (ProviderConfigurationException e) {
+            throw new OptionsException("Error applying default provider configuration", e);
         }
-        provider.configure(new PersistenceConfig(optionsClass));
 
         return provider;
     }
