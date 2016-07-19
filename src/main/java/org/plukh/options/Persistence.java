@@ -16,7 +16,7 @@
 
 package org.plukh.options;
 
-import org.plukh.options.impl.persistence.TransientPersistenceProvider;
+import org.plukh.options.impl.persistence.PropertiesPersistenceProvider;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -27,26 +27,13 @@ import java.lang.annotation.Target;
  * Annotate interface extending {@link Options} with this annotation to specify what backing store provider should
  * be used by the {@link org.plukh.options.Options#load(boolean)} and {@link Options#save(boolean)} methods to persist
  * option values.
- * <p/>
- * To use a custom persistence provider, use {@code PersistenceType.CUSTOM} as {@code value} and specify a custom provider
- * class in {@code provider} element.
- *
- * @see PersistenceType
  */
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 public @interface Persistence {
     /**
-     * One of the constants specified in {@link PersistenceType} enum. Use {@code PersistenceType.CUSTOM} to
-     * use a custom persistence provider. Default is {@link org.plukh.options.impl.persistence.PropertiesPersistenceProvider},
-     * which stores options to a {@code .properties} file.
+     * Specify a persistence provider class.
      */
-    PersistenceType value() default PersistenceType.PROPERTIES_FILE;
-
-    /**
-     * Specify a custom persistence provider class. The value of this element is ignored if {@code value} element is
-     * set to anything but {@code PersistenceType.CUSTOM}.
-     */
-    Class<? extends PersistenceProvider> provider() default TransientPersistenceProvider.class;
+    Class<? extends PersistenceProvider> value() default PropertiesPersistenceProvider.class;
 }

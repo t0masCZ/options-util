@@ -18,10 +18,10 @@ package org.plukh.options.impl.persistence.interfaces;
 
 import org.plukh.options.Option;
 import org.plukh.options.Persistence;
-import org.plukh.options.PersistenceType;
 import org.plukh.options.impl.persistence.PersistenceOptions;
+import org.plukh.options.impl.persistence.PropertiesPersistenceProvider;
 
-@Persistence(PersistenceType.PROPERTIES_FILE)
+@Persistence(PropertiesPersistenceProvider.class)
 public interface ReadOnlyTestOptions extends PersistenceOptions {
     @Option(key="read.only", readOnly = true, defaultValue = "1")
     int getReadOnlyOption();

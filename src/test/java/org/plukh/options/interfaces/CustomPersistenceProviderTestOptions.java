@@ -18,7 +18,7 @@ package org.plukh.options.interfaces;
 
 import org.plukh.options.*;
 
-@Persistence(value = PersistenceType.CUSTOM, provider = TestPersistenceProvider.class)
+@Persistence(TestPersistenceProvider.class)
 public interface CustomPersistenceProviderTestOptions extends Options {
     @Option
     int getInt();

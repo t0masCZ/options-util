@@ -17,11 +17,12 @@
 package org.plukh.options.interfaces;
 
 import org.plukh.options.*;
+import org.plukh.options.impl.persistence.TransientPersistenceProvider;
 
 import java.util.Date;
 import java.util.Queue;
 
-@Persistence(PersistenceType.TRANSIENT)
+@Persistence(TransientPersistenceProvider.class)
 public interface TestOptions extends Options {
     @Option(key = "int")
     int getInt();

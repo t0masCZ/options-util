@@ -19,7 +19,6 @@ package org.plukh.options;
 import org.plukh.options.impl.OptionsProxyHandler;
 import org.plukh.options.impl.collections.OptionsQueue;
 import org.plukh.options.impl.options.*;
-import org.plukh.options.impl.persistence.PropertiesPersistenceProvider;
 import org.plukh.options.impl.persistence.TransientPersistenceProvider;
 
 import java.beans.Introspector;
@@ -311,31 +310,13 @@ public class OptionsFactory {
 
         //Try to look up @Persistence annotation on options class
         Persistence persistenceAnnotation = optionsClass.getAnnotation(Persistence.class);
+        Class providerClass = persistenceAnnotation == null ? TransientPersistenceProvider.class : persistenceAnnotation.value();
 
-        if (persistenceAnnotation == null) {
-            provider = new TransientPersistenceProvider();
-        } else {
-            //Read annotation elements and instantiare a corresponding persistence provider class
-            switch (persistenceAnnotation.value()) {
-                case TRANSIENT: provider = new TransientPersistenceProvider();
-                    break;
-                case PROPERTIES_FILE: provider = new PropertiesPersistenceProvider();
-                    break;
-                //TODO: Implement XML provider
-                case XML_FILE: throw new OptionsException("XML provider not implemented yet");
-                case CUSTOM:
-                    Class providerClass = persistenceAnnotation.provider();
-                    try {
-                        provider = (PersistenceProvider) providerClass.newInstance();
-                    } catch (Exception e) {
-                        throw new OptionsException("Error instantiating custom persistence provider for class: " +
-                                providerClass.getName(), e);
-                    }
-                    break;
-                default: throw new OptionsException("Unsupported persistence type");
-            }
+        try {
+            provider = (PersistenceProvider) providerClass.newInstance();
+        } catch (Exception e) {
+            throw new OptionsException("Error instantiating persistence provider for class: " + providerClass.getName(), e);
         }
-
         provider.configure(new PersistenceConfig(optionsClass));
 
         return provider;

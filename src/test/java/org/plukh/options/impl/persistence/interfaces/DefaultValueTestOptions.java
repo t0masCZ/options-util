@@ -18,10 +18,10 @@ package org.plukh.options.impl.persistence.interfaces;
 
 import org.plukh.options.Option;
 import org.plukh.options.Persistence;
-import org.plukh.options.PersistenceType;
 import org.plukh.options.impl.persistence.PersistenceOptions;
+import org.plukh.options.impl.persistence.PropertiesPersistenceProvider;
 
-@Persistence(PersistenceType.PROPERTIES_FILE)
+@Persistence(PropertiesPersistenceProvider.class)
 public interface DefaultValueTestOptions extends PersistenceOptions {
     @Option(key = "default.value", defaultValue = "1")
     int getValue();
