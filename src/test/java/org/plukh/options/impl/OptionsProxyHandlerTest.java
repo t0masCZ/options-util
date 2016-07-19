@@ -26,6 +26,7 @@ import org.plukh.options.impl.options.BooleanOption;
 import org.plukh.options.impl.options.IntegerOption;
 import org.plukh.options.impl.options.StringOption;
 import org.plukh.options.PersistenceConfig;
+import org.plukh.options.impl.persistence.PropertiesPersistenceProvider;
 import org.plukh.options.interfaces.TestOptions;
 
 import java.lang.reflect.Method;
@@ -70,7 +71,7 @@ public class OptionsProxyHandlerTest {
             setters.put(TestOptions.class.getMethod(SETTERS[i], new Class[]{SETTER_CLASSES[i]}), option);
         }
 
-        handler = new OptionsProxyHandler(TestOptions.class, getters, setters);
+        handler = new OptionsProxyHandler(TestOptions.class, getters, setters, new PropertiesPersistenceProvider());
     }
 
     private void createProxy() {

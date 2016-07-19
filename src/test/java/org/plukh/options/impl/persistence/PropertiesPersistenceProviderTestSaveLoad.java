@@ -20,10 +20,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.plukh.options.Options;
-import org.plukh.options.OptionsException;
-import org.plukh.options.OptionsFactory;
-import org.plukh.options.TestUtils;
+import org.plukh.options.*;
 import org.plukh.options.impl.OptionsProxyHandler;
 import org.plukh.options.interfaces.TestOptions;
 
@@ -56,7 +53,7 @@ public class PropertiesPersistenceProviderTestSaveLoad {
     }
 
     @Test
-    public void simpleSaveToExistingDirectory() throws IOException, OptionsException {
+    public void simpleSaveToExistingDirectory() throws IOException, OptionsException, ProviderConfigurationException {
         Options options = setupOptions(TestOptions.class);
         options.configurePersistenceProvider(new FileConfig(tempDir.getAbsolutePath(), "test.properties"));
         options.save(false);
@@ -69,7 +66,7 @@ public class PropertiesPersistenceProviderTestSaveLoad {
     }
 
     @Test
-    public void saveWithBackup() throws OptionsException {
+    public void saveWithBackup() throws ProviderConfigurationException, OptionsException {
         Options options = setupOptions(TestOptions.class);
         options.configurePersistenceProvider(new FileConfig(tempDir.getAbsolutePath(), "test.properties", true));
 
@@ -86,7 +83,7 @@ public class PropertiesPersistenceProviderTestSaveLoad {
     }
 
     @Test
-    public void saveWithMultipleDirectories() throws OptionsException {
+    public void saveWithMultipleDirectories() throws OptionsException, ProviderConfigurationException {
         Options options = setupOptions(TestOptions.class);
         File optionsFile = new File(tempDir.getAbsolutePath() + File.separator + "testdir", "test.properties");
 
@@ -98,7 +95,7 @@ public class PropertiesPersistenceProviderTestSaveLoad {
     }
 
     @Test
-    public void testSimpleLoad() throws OptionsException, IOException {
+    public void testSimpleLoad() throws OptionsException, IOException, ProviderConfigurationException {
         TestOptions options = (TestOptions) setupOptions(TestOptions.class);
         options.configurePersistenceProvider(new FileConfig(tempDir.getAbsolutePath(), "test.properties"));
 
@@ -115,7 +112,7 @@ public class PropertiesPersistenceProviderTestSaveLoad {
     }
 
     @Test
-    public void loadingNonExistentFileShouldNotResetOptionValuesToDefault() throws OptionsException {
+    public void loadingNonExistentFileShouldNotResetOptionValuesToDefault() throws OptionsException, ProviderConfigurationException {
         TestOptions options = (TestOptions) setupOptions(TestOptions.class);
         options.configurePersistenceProvider(new FileConfig("aaabbb", "aaabbbb"));
 

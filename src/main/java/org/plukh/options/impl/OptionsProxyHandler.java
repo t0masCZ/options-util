@@ -19,7 +19,6 @@ package org.plukh.options.impl;
 import org.plukh.options.*;
 import org.plukh.options.impl.options.AbstractOption;
 import org.plukh.options.impl.persistence.PersistenceOptions;
-import org.plukh.options.impl.persistence.PropertiesPersistenceProvider;
 import org.plukh.options.impl.persistence.StreamPersistenceProvider;
 
 import java.io.InputStream;
@@ -30,12 +29,12 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OptionsProxyHandler implements InvocationHandler {
-    private Map<Method, Method> methods;
+public class OptionsProxyHandler implements InvocationHandler, Options, PersistenceOptions {
+    private Map<Method, Method> methodsMapping;
     private Map<Method, AbstractOption> getters;
     private Map<Method, AbstractOption> setters;
 
-    public static final Map<Class, Object> DEFAULT_PRIMITIVE_VALUES = new HashMap<Class, Object>();
+    public static final Map<Class, Object> DEFAULT_PRIMITIVE_VALUES = new HashMap<>();
     static {
         DEFAULT_PRIMITIVE_VALUES.put(byte.class, (byte) 0);
         DEFAULT_PRIMITIVE_VALUES.put(short.class, (short)0);
@@ -51,36 +50,29 @@ public class OptionsProxyHandler implements InvocationHandler {
 
     private PersistenceProvider persistenceProvider;
 
-    public OptionsProxyHandler(Class<? extends Options> optionsClass, Map<Method, AbstractOption> getters, Map<Method, AbstractOption> setters) throws NoSuchMethodException {
-        this.optionsClass = optionsClass;
-        this.getters = getters;
-        this.setters = setters;
-        this.methods = getMethods();
-        this.persistenceProvider = new PropertiesPersistenceProvider();
-    }
-
     public OptionsProxyHandler(Class<? extends Options> optionsClass, Map<Method, AbstractOption> getters, Map<Method, AbstractOption> setters, PersistenceProvider persistenceProvider) throws NoSuchMethodException {
         this.optionsClass = optionsClass;
         this.getters = getters;
         this.setters = setters;
-        this.methods = getMethods();
+        this.methodsMapping = getMethodsMapping();
         this.persistenceProvider = persistenceProvider;
     }
 
     //TODO: implement test for InvocationTargetException!!!
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (methods.containsKey(method)) {
+    public synchronized Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if (methodsMapping.containsKey(method)) {
             try {
-                return methods.get(method).invoke(this, args);
+                return methodsMapping.get(method).invoke(this, args);
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
+        } else if (getters.containsKey(method)) {
+            return getValue(getters.get(method), method.getReturnType());
+        } else {
+            setValue(setters.get(method), args[0]);
+            return null;
         }
-
-        if (getters.containsKey(method)) return getValue(getters.get(method), method.getReturnType());
-        setValue(setters.get(method), args[0]);
-        return null;
     }
 
     private synchronized Object getValue(AbstractOption option, Class type) {
@@ -92,36 +84,35 @@ public class OptionsProxyHandler implements InvocationHandler {
         option.setValue(value);
     }
 
-    private Map<Method, Method> getMethods() throws NoSuchMethodException {
-        Map<Method, Method> methods = new HashMap<Method, Method>();
+    private Map<Method, Method> getMethodsMapping() throws NoSuchMethodException {
+        Map<Method, Method> methods = new HashMap<>();
 
-        methods.put(Options.class.getMethod("load", boolean.class),
-                       getClass().getMethod("load", boolean.class));
-        methods.put(Options.class.getMethod("save", boolean.class),
-                       getClass().getMethod("save", boolean.class));
-        methods.put(Options.class.getMethod("resetToDefault"),
-                       getClass().getMethod("resetToDefault"));
+        methods.put(Options.class.getMethod("load", boolean.class), getClass().getMethod("load", boolean.class));
+        methods.put(Options.class.getMethod("save", boolean.class), getClass().getMethod("save", boolean.class));
+        methods.put(Options.class.getMethod("resetToDefault"), getClass().getMethod("resetToDefault"));
         methods.put(Options.class.getMethod("configurePersistenceProvider", PersistenceConfig.class),
                        getClass().getMethod("configurePersistenceProvider", PersistenceConfig.class));
 
-        //PersistenceOptions methods
+        //PersistenceOptions methodsMapping
         methods.put(PersistenceOptions.class.getMethod("saveToStream", OutputStream.class, boolean.class),
                                   getClass().getMethod("saveToStream", OutputStream.class, boolean.class));
         methods.put(PersistenceOptions.class.getMethod("loadFromStream", InputStream.class, boolean.class),
                                   getClass().getMethod("loadFromStream", InputStream.class, boolean.class));
 
-
         return methods;
     }
 
+    @Override
     public synchronized boolean load(boolean suppressConversionErrors) throws OptionsException {
         return persistenceProvider.load(getters.values(), suppressConversionErrors);
     }
 
+    @Override
     public synchronized void save(boolean nonDefaultOnly) throws OptionsException {
         persistenceProvider.save(getters.values(), nonDefaultOnly);
     }
 
+    @Override
     public synchronized void resetToDefault() {
         for (AbstractOption option : getters.values()) {
             option.resetToDefaultValue();
@@ -136,17 +127,19 @@ public class OptionsProxyHandler implements InvocationHandler {
         this.persistenceProvider = persistenceProvider;
     }
 
+    @Override
     public synchronized void configurePersistenceProvider(PersistenceConfig configuration) throws ProviderConfigurationException {
         configuration.setOptionsClass(optionsClass);
         persistenceProvider.configure(configuration);
     }
 
+    @Override
     public synchronized void loadFromStream(InputStream in, boolean suppressConversionErrors) throws OptionsException {
         ((StreamPersistenceProvider)persistenceProvider).loadFromStream(in, getters.values(), suppressConversionErrors);
     }
 
-    public synchronized void saveToStream(OutputStream out, boolean nonDefaultOnly)
-            throws OptionsException {
+    @Override
+    public synchronized void saveToStream(OutputStream out, boolean nonDefaultOnly) throws OptionsException {
         ((StreamPersistenceProvider)persistenceProvider).saveToStream(out, getters.values(), nonDefaultOnly);
     }
 }

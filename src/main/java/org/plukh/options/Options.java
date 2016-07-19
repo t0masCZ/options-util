@@ -77,9 +77,9 @@ public interface Options {
      * information on configuration information class used by the particular provider.
      *
      * @param configuration provider-specific configuration object.
-     * @throws OptionsException when an errors occures when setting up the provider.
+     * @throws ProviderConfigurationException when an errors occures when setting up the provider.
      */
-    void configurePersistenceProvider(PersistenceConfig configuration) throws OptionsException;
+    void configurePersistenceProvider(PersistenceConfig configuration) throws ProviderConfigurationException;
 
     /**
      * Loads option values from a backing store. The store to be used is determined by {@link PersistenceProvider} configured
