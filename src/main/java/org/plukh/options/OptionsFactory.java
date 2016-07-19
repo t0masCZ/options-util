@@ -23,7 +23,6 @@ import org.plukh.options.impl.persistence.PropertiesPersistenceProvider;
 import org.plukh.options.impl.persistence.TransientPersistenceProvider;
 
 import java.beans.Introspector;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.*;
@@ -45,14 +44,14 @@ public class OptionsFactory {
     private static final int GROUP_NAME = 4;
     private static final int GROUP_PREFIX = 1;
 
-    private static final Pattern VALID_KEY_PATTERN = Pattern.compile("^[a-zA-Z0-9_\\-\\.]+");
+    private static final Pattern VALID_KEY_PATTERN = Pattern.compile("^[a-zA-Z0-9_\\-.]+");
 
     static {
         registerStandardOptionTypes();
         registerStandardCollectionTypes();
     }
 
-    private final static Map<Class<? extends Options>, Options> optionsInstanceCache = new HashMap<Class<? extends Options>, Options>();
+    private final static Map<Class<? extends Options>, Options> optionsInstanceCache = new HashMap<>();
 
     /**
      * Dummy method used to make sure that this class is loaded and initialized when unit-testing. Don't call in
@@ -64,9 +63,9 @@ public class OptionsFactory {
 
     /**
      * Returns proxy object instance implementing application-specific options interface. This method is thread-safe.
-     * @param optionsClass Application-specifc options interface class extending {@link Options}.
+     * @param optionsClass Application-specific options interface class extending {@link Options}.
      * @return an instance of the object implementing the passed interface.
-     * @throws OptionsException in case of instantiation errors.
+     * @throws OptionsInstantiationException in case of instantiation errors.
      */
 
     //Throw an unchecked exception from this method for convenience; we don't expect options to be misconfigured in production!
@@ -74,7 +73,7 @@ public class OptionsFactory {
         synchronized (optionsInstanceCache) {
             if (optionsInstanceCache.containsKey(optionsClass)) return optionsInstanceCache.get(optionsClass);
 
-            Options options = null;
+            Options options;
             try {
                 options = createOptionsInstance(optionsClass);
             } catch (OptionsException e) {
@@ -92,8 +91,8 @@ public class OptionsFactory {
         Map<Method, Method> setters = findMatchingSetters(optionsClass, getters);
 
         //Create options based on getters' annotations
-        Map<Method, AbstractOption> gettersWithOptions = new HashMap<Method, AbstractOption>();
-        Map<Method, AbstractOption> settersWithOptions = new HashMap<Method, AbstractOption>();
+        Map<Method, AbstractOption> gettersWithOptions = new HashMap<>();
+        Map<Method, AbstractOption> settersWithOptions = new HashMap<>();
         fillOptionsMaps(getters, setters, gettersWithOptions, settersWithOptions);
 
         //Get configured persistence provider
@@ -112,8 +111,8 @@ public class OptionsFactory {
         return getProxyInstance(optionsClass, handler);
     }
 
-    protected static List<Method> createGettersList(Class<? extends Options> optionsClass) throws OptionsException {
-        List<Method> getters = new LinkedList<Method>();
+    private static List<Method> createGettersList(Class<? extends Options> optionsClass) throws OptionsException {
+        List<Method> getters = new LinkedList<>();
         Method[] methods = optionsClass.getMethods();
 
         for (Method method : methods) {
@@ -140,7 +139,7 @@ public class OptionsFactory {
     }
 
     private static void validateMethodName(Method method, String name, String prefix) throws OptionsException {
-        final Class clazz = method.getDeclaringClass();
+        final Class<?> clazz = method.getDeclaringClass();
 
         //Validate naming further (only boolean getters can have "is" prefix, only one (is|get) prefix
         //should be present for a given property)
@@ -148,7 +147,7 @@ public class OptionsFactory {
         //See if we're dealing with a boolean
         if (method.getReturnType().equals(boolean.class) || method.getReturnType().equals(Boolean.class)) {
             try {
-                Method anotherMethod = clazz.getMethod(prefix.equals("is") ? "get" + name : "is" + name);
+                clazz.getMethod(prefix.equals("is") ? "get" + name : "is" + name);
                 throw new OptionsException("Only one of (get, is) prefixes can be used for a boolean getter: " + method);
             } catch (NoSuchMethodException e) {
                 //Everything's fine
@@ -158,15 +157,15 @@ public class OptionsFactory {
         }
     }
 
-    protected static Map<Method, Method> findMatchingSetters(Class<? extends Options> optionsClass, List<Method> getters)
+    private static Map<Method, Method> findMatchingSetters(Class<? extends Options> optionsClass, List<Method> getters)
             throws OptionsException {
-        Map<Method, Method> gettersToSetters = new HashMap<Method, Method>();
+        Map<Method, Method> gettersToSetters = new HashMap<>();
 
         for (Method getter : getters) {
             String optionName = getPropertyName(getter, false);
             Method setter;
             try {
-                setter = optionsClass.getMethod("set" + optionName, new Class[] {getter.getReturnType()});
+                setter = optionsClass.getMethod("set" + optionName, getter.getReturnType());
             } catch (NoSuchMethodException e) {
                 setter = null;
             }
@@ -187,15 +186,18 @@ public class OptionsFactory {
 
     private static String getPropertyName(Method getter, boolean decapitalize) {
         Matcher m = GETTER_PATTERN.matcher(getter.getName());
-        m.matches();
+        if (!m.matches()) {
+            //TODO: Add the correct response
+            System.err.println("Wrong name");
+        }
         //Use properly decapitalized property name
         return decapitalize ? Introspector.decapitalize(m.group(GROUP_NAME)) : m.group(GROUP_NAME);
     }
 
-    protected static void fillOptionsMaps(List<Method> getters, Map<Method, Method> setters,
+    private static void fillOptionsMaps(List<Method> getters, Map<Method, Method> setters,
                                           Map<Method, AbstractOption> gettersWithOptions,
                                           Map<Method, AbstractOption> settersWithOptions) throws OptionsException {
-        Set<String> keys = new HashSet<String>();
+        Set<String> keys = new HashSet<>();
 
         try {
             for (Method getter : getters) {
@@ -253,7 +255,7 @@ public class OptionsFactory {
 
         //Validate backing class
         try {
-            Constructor constructor = collectionAnnotation.backingClass().getConstructor();
+            collectionAnnotation.backingClass().getConstructor();
         } catch (NoSuchMethodException e) {
             throw new UnsupportedOptionClassException("Backing class " + collectionAnnotation.backingClass().getName() +
                     " doesn't have a public default constructor");
@@ -271,7 +273,6 @@ public class OptionsFactory {
     private static Character validateKey(String key) {
         Matcher m = VALID_KEY_PATTERN.matcher(key);
         //Try a find and see if all of the key matches the pattern
-        char illegalChar;
         if (m.find()) {
             if (m.end() == key.length()) return null;
             return key.charAt(m.end());
@@ -279,27 +280,27 @@ public class OptionsFactory {
         return key.charAt(0);
     }
 
-    protected static void setCollectionOptionFromAnnotation(Method getter, org.plukh.options.impl.options.CollectionOption option) {
+    private static void setCollectionOptionFromAnnotation(Method getter, org.plukh.options.impl.options.CollectionOption option) {
         CollectionOption annotation = getter.getAnnotation(CollectionOption.class);
 
         option.setKey(annotation.key().isEmpty() ? getPropertyName(getter, true) : annotation.key());
-        if (annotation.defaultValue() == null || !annotation.defaultValue().isEmpty()) option.setDefaultValue(annotation.defaultValue());
+        if (!annotation.defaultValue().isEmpty()) option.setDefaultValue(annotation.defaultValue());
         option.setTransient(annotation.transientOption());
         option.setReadOnly(true);
     }
 
-    protected static void setScalarOptionFromAnnotation(Method getter, AbstractOption option) {
+    private static void setScalarOptionFromAnnotation(Method getter, AbstractOption option) {
         Option annotation = getter.getAnnotation(Option.class);
 
         option.setKey(annotation.key().isEmpty() ? getPropertyName(getter, true) : annotation.key());
-        //Ignore default value for non-convertable options
+        //Ignore default value for non-convertible options
         if (!(option instanceof NonConvertableOption) &&
-                (annotation.defaultValue() == null || !annotation.defaultValue().isEmpty())) option.setDefaultValue(annotation.defaultValue());
+                (!annotation.defaultValue().isEmpty())) option.setDefaultValue(annotation.defaultValue());
         option.setTransient(annotation.transientOption());
         option.setReadOnly(annotation.readOnly());
     }
 
-    protected static void setOptionFromAnnotation(Method getter, AbstractOption option) {
+    private static void setOptionFromAnnotation(Method getter, AbstractOption option) {
         if (getter.getAnnotation(Option.class) != null) setScalarOptionFromAnnotation(getter, option);
         else setCollectionOptionFromAnnotation(getter, (org.plukh.options.impl.options.CollectionOption) option);
     }
@@ -340,7 +341,7 @@ public class OptionsFactory {
         return provider;
     }
 
-    protected static OptionsProxyHandler createHandler(Class<? extends Options> optionsClass, Map<Method, AbstractOption> gettersWithOptions,
+    private static OptionsProxyHandler createHandler(Class<? extends Options> optionsClass, Map<Method, AbstractOption> gettersWithOptions,
                                                        Map<Method, AbstractOption> settersWithOptions,
                                                        PersistenceProvider pp) throws OptionsException {
         try {
@@ -350,21 +351,17 @@ public class OptionsFactory {
         }
     }
 
-    protected static Options getProxyInstance(Class<? extends Options> optionsClass, OptionsProxyHandler handler) {
+    private static Options getProxyInstance(Class<? extends Options> optionsClass, OptionsProxyHandler handler) {
         return (Options) Proxy.newProxyInstance(optionsClass.getClassLoader(),
                 new Class<?>[]{optionsClass}, handler);
     }
 
-    protected int getInstanceCacheSize() {
-        return optionsInstanceCache.size();
-    }
-
-    protected static void reset() {
+    static void reset() {
         //Clear cache
         optionsInstanceCache.clear();
     }
 
-    protected static void registerStandardOptionTypes() {
+    private static void registerStandardOptionTypes() {
         AbstractOption.registerOptionClassForType(int.class, IntegerOption.class);
         AbstractOption.registerOptionClassForType(Integer.class, IntegerOption.class);
         AbstractOption.registerOptionClassForType(boolean.class, BooleanOption.class);
@@ -375,7 +372,7 @@ public class OptionsFactory {
         AbstractOption.registerOptionClassForType(Double.class, DoubleOption.class);
     }
 
-    protected static void registerStandardCollectionTypes() {
+    private static void registerStandardCollectionTypes() {
         AbstractOption.registerCollectionOptionClassForType(Queue.class, OptionsQueue.class);
     }
 }

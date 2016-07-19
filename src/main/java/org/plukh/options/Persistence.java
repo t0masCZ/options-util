@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 
 /**
  * Annotate interface extending {@link Options} with this annotation to specify what backing store provider should
- * be used by the {@link org.plukh.options.Options#load()} and {@link Options#save(boolean)} methods to persist
+ * be used by the {@link org.plukh.options.Options#load(boolean)} and {@link Options#save(boolean)} methods to persist
  * option values.
  * <p/>
  * To use a custom persistence provider, use {@code PersistenceType.CUSTOM} as {@code value} and specify a custom provider

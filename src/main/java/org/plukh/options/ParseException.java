@@ -19,7 +19,7 @@ package org.plukh.options;
 /**
  * {@code ParseException} is thrown when string-to-value conversion fails for an instance of the option class (see
  * {@link org.plukh.options.impl.options.AbstractOption#convertStringToValue(String)}). This exception is most often encountered
- * as a cause of {@code OptionsException} when invoking {@link org.plukh.options.Options#load()} method from
+ * as a cause of {@code OptionsException} when invoking {@link org.plukh.options.Options#load(boolean)} method from
  * from an application-specific interface instance.
  */
 public class ParseException extends RuntimeException {

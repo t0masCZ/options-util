@@ -249,6 +249,16 @@ public abstract class AbstractOption {
      */
     public static AbstractOption getOptionForClass(Class clazz) throws UnsupportedOptionClassException, IllegalAccessException, InstantiationException {
         Class<? extends AbstractOption> optionClass = OPTION_CLASSES.get(clazz);
+
+        /*
+        if (optionClass == null) {
+            for (Class clazzFor: OPTION_CLASSES.keySet()) {
+                if (clazzFor.isAssignableFrom(clazz)) {
+                    optionClass = OPTION_CLASSES.get(clazzFor);
+                }
+            }
+        }*/
+
         if (optionClass == null) throw new UnsupportedOptionClassException("There is no supported option class for " +
                 clazz.getName());
         return optionClass.newInstance();

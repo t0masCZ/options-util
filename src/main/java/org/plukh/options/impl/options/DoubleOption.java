@@ -5,7 +5,7 @@ import org.plukh.options.ParseException;
 /**
  * Created by t0mas on 18.7.16.
  */
-public class DoubleOption extends AbstractOption{
+public class DoubleOption extends AbstractOption {
     @Override
     public Object convertStringToValue(String s) throws ParseException {
         if (s == null || s.isEmpty()) return null;
