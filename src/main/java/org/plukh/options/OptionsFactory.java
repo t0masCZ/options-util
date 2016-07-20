@@ -97,7 +97,7 @@ public class OptionsFactory {
         //Get configured persistence provider
         PersistenceProvider pp = getPersistenceProvider(optionsClass);
         //Instantiate handler
-        OptionsProxyHandler handler = createHandler(optionsClass, gettersWithOptions, settersWithOptions, pp);
+        OptionsProxyHandler handler = createHandler(gettersWithOptions, settersWithOptions, pp);
         //Instantiate and return proxy object
         return createProxyInstance(optionsClass, handler);
     }
@@ -319,18 +319,21 @@ public class OptionsFactory {
         try {
             provider = (PersistenceProvider) providerClass.newInstance();
             provider.init(optionsClass);
-            //TODO: add configuration to annotation
-            //provider.configure(new PersistenceConfig(optionsClass));
+
+            if (persistenceAnnotation != null && persistenceAnnotation.config() != Persistence.EMPTY_CONFIG.class) {
+                PersistenceConfig persistenceConfig = persistenceAnnotation.config().newInstance();
+                provider.configure(persistenceConfig);
+            }
         } catch (InstantiationException | IllegalAccessException e) {
             throw new OptionsException("Error instantiating persistence provider for class: " + providerClass.getName(), e);
-        } /*catch (ProviderConfigurationException e) {
-            throw new OptionsException("Error applying default provider configuration", e);
-        }*/
+        } catch (ProviderConfigurationException e) {
+            throw new OptionsException("Error applying provider configuration from annotation", e);
+        }
 
         return provider;
     }
 
-    private static OptionsProxyHandler createHandler(Class<? extends Options> optionsClass, Map<Method, AbstractOption> gettersWithOptions,
+    private static OptionsProxyHandler createHandler(Map<Method, AbstractOption> gettersWithOptions,
                                                        Map<Method, AbstractOption> settersWithOptions, PersistenceProvider pp) throws OptionsException {
         try {
             return new OptionsProxyHandler(gettersWithOptions, settersWithOptions, pp);

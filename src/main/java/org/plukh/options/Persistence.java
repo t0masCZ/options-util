@@ -36,4 +36,12 @@ public @interface Persistence {
      * Specify a persistence provider class.
      */
     Class<? extends PersistenceProvider> value() default PropertiesPersistenceProvider.class;
+
+    /**
+     * Specify a config class for provider. Class <b>must</b> implement a public no-args constructor.
+     */
+    Class<? extends PersistenceConfig> config() default EMPTY_CONFIG.class;
+
+    class EMPTY_CONFIG extends PersistenceConfig {
+    }
 }
