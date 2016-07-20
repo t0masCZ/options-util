@@ -161,6 +161,6 @@ public class TestUtils {
     }
 
     public static void resetOptionsFactory() {
-        OptionsFactory.reset();
+        OptionsFactory.clearInstancesCache();
     }
 }

@@ -43,7 +43,7 @@ import static org.junit.Assert.fail;
 public class OptionsFactoryTest {
     @Before
     public void setUp() {
-        OptionsFactory.reset();
+        OptionsFactory.clearInstancesCache();
     }
 
     @Test

@@ -50,14 +50,13 @@ public class OptionsFactory {
         registerStandardCollectionTypes();
     }
 
-    private final static Map<Class<? extends Options>, Options> optionsInstanceCache = new HashMap<>();
+    private final static Map<Class<? extends Options>, Options> instancesCache = new HashMap<>();
 
     /**
      * Dummy method used to make sure that this class is loaded and initialized when unit-testing. Don't call in
      * production code (though no harm will come from calling it as well).
      */
     public static void init() {
-
     }
 
     /**
@@ -69,14 +68,14 @@ public class OptionsFactory {
 
     //Throw an unchecked exception from this method for convenience; we don't expect options to be misconfigured in production!
     public static <T extends Options> T getOptionsInstance(Class<T> optionsClass) throws OptionsInstantiationException {
-        synchronized (optionsInstanceCache) {
-            if (optionsInstanceCache.containsKey(optionsClass)) {
-                return optionsClass.cast(optionsInstanceCache.get(optionsClass));
+        synchronized (instancesCache) {
+            if (instancesCache.containsKey(optionsClass)) {
+                return optionsClass.cast(instancesCache.get(optionsClass));
             }
 
             try {
                 T options = createOptionsInstance(optionsClass);
-                optionsInstanceCache.put(optionsClass, options);
+                instancesCache.put(optionsClass, options);
                 return options;
             } catch (OptionsException e) {
                 throw new OptionsInstantiationException(e);
@@ -100,7 +99,7 @@ public class OptionsFactory {
         //Instantiate handler
         OptionsProxyHandler handler = createHandler(optionsClass, gettersWithOptions, settersWithOptions, pp);
         //Instantiate and return proxy object
-        return getProxyInstance(optionsClass, handler);
+        return createProxyInstance(optionsClass, handler);
     }
 
     private static List<Method> createGettersList(Class<? extends Options> optionsClass) throws OptionsException {
@@ -145,12 +144,13 @@ public class OptionsFactory {
                 //Everything's fine
             }
         }  else {
-            if (prefix.equals("is")) throw new OptionsException("Only boolean getters can have \"is\" prefix: " + method);
+            if (prefix.equals("is")) {
+                throw new OptionsException("Only boolean getters can have \"is\" prefix: " + method);
+            }
         }
     }
 
-    private static Map<Method, Method> findMatchingSetters(Class<? extends Options> optionsClass, List<Method> getters)
-            throws OptionsException {
+    private static Map<Method, Method> findMatchingSetters(Class<? extends Options> optionsClass, List<Method> getters) throws OptionsException {
         Map<Method, Method> gettersToSetters = new HashMap<>();
 
         for (Method getter : getters) {
@@ -164,11 +164,13 @@ public class OptionsFactory {
 
             //See if the method is annotated as read-only or is annotated as collection option
             if (getter.getAnnotation(Option.class) != null && getter.getAnnotation(Option.class).readOnly() || getter.getAnnotation(CollectionOption.class) != null) { //Collection options are read-only always
-                if (setter != null) throw new OptionsException("Read-only getter " + getter +
-                        " has a matching setter in " + getter.getDeclaringClass().getName());
+                if (setter != null) {
+                    throw new OptionsException("Read-only getter " + getter + " has a matching setter in " + getter.getDeclaringClass().getName());
+                }
             } else {
-                if (setter == null) throw new OptionsException("No suitable setter for getter " + getter +
-                        " found in " + getter.getDeclaringClass().getName());
+                if (setter == null) {
+                    throw new OptionsException("No suitable setter for getter " + getter + " found in " + getter.getDeclaringClass().getName());
+                }
                 gettersToSetters.put(getter, setter);
             }
         }
@@ -199,22 +201,25 @@ public class OptionsFactory {
                     //See if this is a scalar transient option
                     Option optionAnnotation = getter.getAnnotation(Option.class);
 
-                    if (optionAnnotation != null && optionAnnotation.transientOption())
+                    if (optionAnnotation != null && optionAnnotation.transientOption()) {
                         option = new NonConvertableOption();
-                    else
+                    } else {
                         throw e;
+                    }
                 }
 
                 setOptionFromAnnotation(getter, option);
 
                 //Validate key uniqueness
-                if (keys.contains(option.getKey())) throw new OptionsException("Key " + option.getKey() + " for method "
-                        + getter + " already defined for " + getter.getDeclaringClass().getName());
+                if (keys.contains(option.getKey())) {
+                    throw new OptionsException("Key " + option.getKey() + " for method " + getter + " already defined for " + getter.getDeclaringClass().getName());
+                }
                 //Validate character keys
                 final Character invalidChar = validateKey(option.getKey());
-                if (invalidChar != null) throw new OptionsException("Key " + option.getKey() + " for method " + getter +
-                        " in class " + getter.getDeclaringClass().getName() + " contains invalid character '" +
-                        invalidChar + "'");
+                if (invalidChar != null) {
+                    throw new OptionsException("Key " + option.getKey() + " for method " + getter + " in class "
+                            + getter.getDeclaringClass().getName() + " contains invalid character '" + invalidChar + "'");
+                }
                 //Add option to maps and update the key set
                 keys.add(option.getKey());
                 gettersWithOptions.put(getter, option);
@@ -224,20 +229,23 @@ public class OptionsFactory {
         } catch (UnsupportedOptionClassException e) {
             throw new OptionsException(e.getMessage(), e);
         } catch (Exception e) {
-            if (e instanceof OptionsException) throw (OptionsException) e;
+            if (e instanceof OptionsException) {
+                throw (OptionsException) e;
+            }
             throw new OptionsException("Exception creating options", e);
         }
     }
 
-    private static AbstractOption instantiateOption(Method getter) throws UnsupportedOptionClassException,
-            IllegalAccessException, InstantiationException {
-        if (getter.getAnnotation(Option.class) != null) return instantiateScalarOption(getter);
-        else return instantiateCollectionOption(getter);
+    private static AbstractOption instantiateOption(Method getter) throws UnsupportedOptionClassException, IllegalAccessException, InstantiationException {
+        if (getter.getAnnotation(Option.class) != null) {
+            return instantiateScalarOption(getter);
+        } else {
+            return instantiateCollectionOption(getter);
+        }
     }
 
     private static AbstractOption instantiateCollectionOption(Method getter) throws UnsupportedOptionClassException {
         CollectionOption collectionAnnotation = getter.getAnnotation(CollectionOption.class);
-
 
         //See if user had specified a backing collection class
         if (collectionAnnotation.backingClass().equals(AbstractCollection.class)) {
@@ -252,8 +260,7 @@ public class OptionsFactory {
                     " doesn't have a public default constructor");
         }
 
-        return AbstractOption.getCollectionOption(collectionAnnotation.elementClass(), getter.getReturnType(),
-                collectionAnnotation.backingClass());
+        return AbstractOption.getCollectionOption(collectionAnnotation.elementClass(), getter.getReturnType(), collectionAnnotation.backingClass());
     }
 
     private static AbstractOption instantiateScalarOption(Method getter) throws UnsupportedOptionClassException,
@@ -265,7 +272,9 @@ public class OptionsFactory {
         Matcher m = VALID_KEY_PATTERN.matcher(key);
         //Try a find and see if all of the key matches the pattern
         if (m.find()) {
-            if (m.end() == key.length()) return null;
+            if (m.end() == key.length()) {
+                return null;
+            }
             return key.charAt(m.end());
         }
         return key.charAt(0);
@@ -285,15 +294,19 @@ public class OptionsFactory {
 
         option.setKey(annotation.key().isEmpty() ? getPropertyName(getter, true) : annotation.key());
         //Ignore default value for non-convertible options
-        if (!(option instanceof NonConvertableOption) &&
-                (!annotation.defaultValue().isEmpty())) option.setDefaultValue(annotation.defaultValue());
+        if (!(option instanceof NonConvertableOption) && (!annotation.defaultValue().isEmpty())) {
+            option.setDefaultValue(annotation.defaultValue());
+        }
         option.setTransient(annotation.transientOption());
         option.setReadOnly(annotation.readOnly());
     }
 
     private static void setOptionFromAnnotation(Method getter, AbstractOption option) throws OptionsException {
-        if (getter.getAnnotation(Option.class) != null) setScalarOptionFromAnnotation(getter, option);
-        else setCollectionOptionFromAnnotation(getter, (org.plukh.options.impl.options.CollectionOption) option);
+        if (getter.getAnnotation(Option.class) != null) {
+            setScalarOptionFromAnnotation(getter, option);
+        } else {
+            setCollectionOptionFromAnnotation(getter, (org.plukh.options.impl.options.CollectionOption) option);
+        }
     }
 
     private static PersistenceProvider getPersistenceProvider(Class<? extends Options> optionsClass) throws OptionsException {
@@ -316,8 +329,7 @@ public class OptionsFactory {
     }
 
     private static OptionsProxyHandler createHandler(Class<? extends Options> optionsClass, Map<Method, AbstractOption> gettersWithOptions,
-                                                       Map<Method, AbstractOption> settersWithOptions,
-                                                       PersistenceProvider pp) throws OptionsException {
+                                                       Map<Method, AbstractOption> settersWithOptions, PersistenceProvider pp) throws OptionsException {
         try {
             return new OptionsProxyHandler(optionsClass, gettersWithOptions, settersWithOptions, pp);
         } catch (NoSuchMethodException e) {
@@ -325,14 +337,14 @@ public class OptionsFactory {
         }
     }
 
-    private static <T extends Options> T getProxyInstance(Class<T> optionsClass, OptionsProxyHandler handler) {
-        return optionsClass.cast(Proxy.newProxyInstance(optionsClass.getClassLoader(),
-                new Class<?>[] { optionsClass }, handler));
+    private static <T extends Options> T createProxyInstance(Class<T> optionsClass, OptionsProxyHandler handler) {
+        return optionsClass.cast(Proxy.newProxyInstance(optionsClass.getClassLoader(), new Class<?>[] { optionsClass }, handler));
     }
 
-    static void reset() {
-        //Clear cache
-        optionsInstanceCache.clear();
+    static void clearInstancesCache() {
+        synchronized (instancesCache) {
+            instancesCache.clear();
+        }
     }
 
     private static void registerStandardOptionTypes() {
