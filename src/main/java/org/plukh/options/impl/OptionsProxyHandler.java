@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,24 +55,28 @@ public class OptionsProxyHandler implements InvocationHandler, Options, Persiste
         this.optionsClass = optionsClass;
         this.getters = getters;
         this.setters = setters;
-        this.methodsMapping = getMethodsMapping();
+        this.methodsMapping = createMethodsMapping();
         this.persistenceProvider = persistenceProvider;
     }
 
     //TODO: implement test for InvocationTargetException!!!
     @Override
     public synchronized Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (methodsMapping.containsKey(method)) {
-            try {
+        try {
+            if (methodsMapping.containsKey(method)) {
                 return methodsMapping.get(method).invoke(this, args);
-            } catch (InvocationTargetException e) {
-                throw e.getCause();
+            } else if (getters.containsKey(method)) {
+                return getValue(getters.get(method), method.getReturnType());
+            } else if (setters.containsKey(method)) {
+                setValue(setters.get(method), args[0]);
+                return null;
+            } else {
+                // last option, try call own method
+                Class<?>[] parameterTypes = method.getParameterTypes();
+                return getClass().getMethod(method.getName(), parameterTypes).invoke(this, args);
             }
-        } else if (getters.containsKey(method)) {
-            return getValue(getters.get(method), method.getReturnType());
-        } else {
-            setValue(setters.get(method), args[0]);
-            return null;
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
         }
     }
 
@@ -84,7 +89,7 @@ public class OptionsProxyHandler implements InvocationHandler, Options, Persiste
         option.setValue(value);
     }
 
-    private Map<Method, Method> getMethodsMapping() throws NoSuchMethodException {
+    private Map<Method, Method> createMethodsMapping() throws NoSuchMethodException {
         Map<Method, Method> methods = new HashMap<>();
 
         methods.put(Options.class.getMethod("load", boolean.class), getClass().getMethod("load", boolean.class));
@@ -141,5 +146,15 @@ public class OptionsProxyHandler implements InvocationHandler, Options, Persiste
     @Override
     public synchronized void saveToStream(OutputStream out, boolean nonDefaultOnly) throws OptionsException {
         ((StreamPersistenceProvider)persistenceProvider).saveToStream(out, getters.values(), nonDefaultOnly);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        // It is necessary, default Object.equals() does not work correct
+        if ((o instanceof Proxy)) {
+            return o.equals(this);
+        } else {
+            return (this == o);
+        }
     }
 }

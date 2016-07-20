@@ -16,7 +16,6 @@
 
 package org.plukh.options;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.plukh.options.impl.OptionsProxyHandler;
@@ -35,7 +34,11 @@ import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class OptionsFactoryTest {
     @Before
@@ -46,7 +49,7 @@ public class OptionsFactoryTest {
     @Test
     public void testProxyInstantiation() throws InstantiationException, OptionsException {
         Object o = OptionsFactory.getOptionsInstance(TestOptions.class);
-        Assert.assertTrue("getOptionsInstance() should return an instance of provided interface", o instanceof TestOptions);
+        assertTrue("getOptionsInstance() should return an instance of provided interface", o instanceof TestOptions);
     }
 
     @Test
@@ -115,9 +118,33 @@ public class OptionsFactoryTest {
         assertEquals(true, option.isReadOnly());
     }
 
+    @SuppressWarnings("EqualsWithItself")
+    @Test
+    public void testEqualsCompareSameOptions() {
+        TestOptions options = (TestOptions) OptionsFactory.getOptionsInstance(TestOptions.class);
+        assertTrue(options.equals(options));
+    }
+
+    @SuppressWarnings("ObjectEqualsNull")
+    @Test
+    public void testEqualsCompareWithNull() {
+        TestOptions options = (TestOptions) OptionsFactory.getOptionsInstance(TestOptions.class);
+        assertFalse(options.equals(null));
+    }
+
+    @Test
+    public void testEqualsCompareDifferentOptions() {
+        TestOptions options = (TestOptions) OptionsFactory.getOptionsInstance(TestOptions.class);
+        AnnotationTransientTestOptions options2 = (AnnotationTransientTestOptions) OptionsFactory.getOptionsInstance(AnnotationTransientTestOptions.class);
+        assertFalse(options.equals(options2));
+    }
+
     @Test
     public void optionsFactoryShouldCacheProxies() {
-        //TODO
+        TestOptions options = (TestOptions) OptionsFactory.getOptionsInstance(TestOptions.class);
+        TestOptions sameOptions = (TestOptions) OptionsFactory.getOptionsInstance(TestOptions.class);
+        assertSame(options, sameOptions);
+        assertEquals(options, sameOptions);
     }
 
     @Test
@@ -136,7 +163,7 @@ public class OptionsFactoryTest {
     public void onlyOneOfIsOrGetPrefixShouldBePresentForBooleanGetter()
             throws InstantiationException, NoSuchMethodException {
         try {
-            Options options = OptionsFactory.getOptionsInstance(BooleanGetterNamingTestOptions.class);
+            OptionsFactory.getOptionsInstance(BooleanGetterNamingTestOptions.class);
             fail("Expected exception not thrown for boolean getter with both \"is\" and \"get\" prefixes");
         } catch (OptionsInstantiationException e) {
             //Ordering of methods is inconsistent in Java 7, so we have to check for both methods
@@ -176,7 +203,7 @@ public class OptionsFactoryTest {
     @Test
     public void allLegalCharactersShouldBeAllowedInKeys() {
         try {
-            Options options = OptionsFactory.getOptionsInstance(LegalCharacterInKeyTestOptions.class);
+            OptionsFactory.getOptionsInstance(LegalCharacterInKeyTestOptions.class);
         } catch (OptionsInstantiationException e) {
             fail("Unable to instantiate proxy for interface with legal characters in keys");
         }
@@ -201,10 +228,10 @@ public class OptionsFactoryTest {
     }
 
     @Test
-    public void transientOptionOfNonSupportedClassShouldGetNonConvertableOption() throws OptionsException,
+    public void transientOptionOfNonSupportedClassShouldGetNonConvertibleOption() throws OptionsException,
             InstantiationException {
         AbstractOption option = getSingleOptionInstance(TransientUnsupportedClassTestOptions.class);
-        assertTrue("Option of unsupported class should be backed by NonConvertableOption", option instanceof NonConvertableOption);
+        assertTrue("Option of unsupported class should be backed by NonConvertibleOption", option instanceof NonConvertableOption);
     }
 
     //Collection option tests
@@ -235,6 +262,8 @@ public class OptionsFactoryTest {
                 "Transient collection option should only allow Collections in return type", null);
     }
 
+
+    @SuppressWarnings("unchecked")
     @Test
     public void testElementClassForCollectionOption() {
         ElementClassCollectionOptionTestOptions options = (ElementClassCollectionOptionTestOptions)
@@ -303,7 +332,7 @@ public class OptionsFactoryTest {
     private void testOptionsInstantiation(Class<? extends Options> optionsClass, String lookForString, String message, String objectType)
             throws InstantiationException {
         try {
-            Options options = OptionsFactory.getOptionsInstance(optionsClass);
+            OptionsFactory.getOptionsInstance(optionsClass);
             fail(message);
         } catch (OptionsInstantiationException e) {
             if (lookForString != null) assertTrue(objectType + " name must be present in the error message: " + e.getMessage(),

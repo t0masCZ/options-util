@@ -23,5 +23,5 @@ import java.util.Queue;
 
 public interface ElementClassCollectionOptionTestOptions extends Options {
     @CollectionOption(elementClass = Integer.class)
-    Queue getCollection();
+    Queue<Integer> getCollection();
 }

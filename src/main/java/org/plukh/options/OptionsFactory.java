@@ -70,7 +70,9 @@ public class OptionsFactory {
     //Throw an unchecked exception from this method for convenience; we don't expect options to be misconfigured in production!
     public static Options getOptionsInstance(Class<? extends Options> optionsClass) throws OptionsInstantiationException {
         synchronized (optionsInstanceCache) {
-            if (optionsInstanceCache.containsKey(optionsClass)) return optionsInstanceCache.get(optionsClass);
+            if (optionsInstanceCache.containsKey(optionsClass)) {
+                return optionsInstanceCache.get(optionsClass);
+            }
 
             Options options;
             try {
