@@ -43,7 +43,7 @@ public class OptionsProxyHandlerTest {
     private static final String[] SETTERS = {"setInt", "setInt2", "setBoolean", "setString"};
     private static final Class[] SETTER_CLASSES = {int.class, int.class, boolean.class, String.class};
     @SuppressWarnings("unchecked")
-    public static final Class<? extends AbstractOption>[] OPTION_CLASSES = new Class[] {IntegerOption.class, IntegerOption.class, BooleanOption.class,
+    private static final Class<? extends AbstractOption>[] OPTION_CLASSES = new Class[] {IntegerOption.class, IntegerOption.class, BooleanOption.class,
             StringOption.class};
 
     private static final String[] DEFAULT_VALUES = new String[] {"1", "2", "true", "1"};
@@ -61,14 +61,14 @@ public class OptionsProxyHandlerTest {
 
     private void createHandler() throws InstantiationException, IllegalAccessException, NoSuchMethodException {
         //Create mock getter/setter maps
-        getters = new HashMap<Method, AbstractOption>();
-        setters = new HashMap<Method, AbstractOption>();
+        getters = new HashMap<>();
+        setters = new HashMap<>();
 
         for (int i = 0; i < GETTERS.length; ++i) {
             AbstractOption option = OPTION_CLASSES[i].newInstance();
             option.setDefaultValue(DEFAULT_VALUES[i]);
             getters.put(TestOptions.class.getMethod(GETTERS[i]), option);
-            setters.put(TestOptions.class.getMethod(SETTERS[i], new Class[]{SETTER_CLASSES[i]}), option);
+            setters.put(TestOptions.class.getMethod(SETTERS[i], SETTER_CLASSES[i]), option);
         }
 
         handler = new OptionsProxyHandler(TestOptions.class, getters, setters, new PropertiesPersistenceProvider());
@@ -94,6 +94,26 @@ public class OptionsProxyHandlerTest {
 
         options.load(false);
         verify(pp);
+    }
+
+    @Test(expected = OptionsException.class)
+    public void testNoThrowInvocationTargetException() throws OptionsException {
+        PersistenceProvider pp = getMockPersistenceProvider();
+        handler.setPersistenceProvider(pp);
+
+        expect(pp.load(getters.values(), false)).andThrow(new OptionsException("")).times(1);
+        expect(handler.equals(new Object())).andThrow(new OptionsException("")).times(1);
+
+        replay(pp);
+
+        handler.load(false);
+        verify(pp);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testNoThrowInvocationTargetExceptionOwnMethod() throws OptionsException {
+        handler.setPersistenceProvider(null);
+        handler.load(false);
     }
 
     @Test

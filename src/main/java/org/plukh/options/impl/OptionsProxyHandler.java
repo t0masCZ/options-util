@@ -59,7 +59,6 @@ public class OptionsProxyHandler implements InvocationHandler, Options, Persiste
         this.persistenceProvider = persistenceProvider;
     }
 
-    //TODO: implement test for InvocationTargetException!!!
     @Override
     public synchronized Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         try {
