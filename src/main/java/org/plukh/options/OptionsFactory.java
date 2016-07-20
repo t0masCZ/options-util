@@ -68,24 +68,23 @@ public class OptionsFactory {
      */
 
     //Throw an unchecked exception from this method for convenience; we don't expect options to be misconfigured in production!
-    public static Options getOptionsInstance(Class<? extends Options> optionsClass) throws OptionsInstantiationException {
+    public static <T extends Options> T getOptionsInstance(Class<T> optionsClass) throws OptionsInstantiationException {
         synchronized (optionsInstanceCache) {
             if (optionsInstanceCache.containsKey(optionsClass)) {
-                return optionsInstanceCache.get(optionsClass);
+                return optionsClass.cast(optionsInstanceCache.get(optionsClass));
             }
 
-            Options options;
             try {
-                options = createOptionsInstance(optionsClass);
+                T options = createOptionsInstance(optionsClass);
+                optionsInstanceCache.put(optionsClass, options);
+                return options;
             } catch (OptionsException e) {
                 throw new OptionsInstantiationException(e);
             }
-            optionsInstanceCache.put(optionsClass, options);
-            return options;
         }
     }
 
-    private static Options createOptionsInstance(Class<? extends Options> optionsClass) throws OptionsException {
+    private static <T extends Options> T createOptionsInstance(Class<T> optionsClass) throws OptionsException {
         //Create a list of (annotated) getters
         List<Method> getters = createGettersList(optionsClass);
         //Find matching setters
@@ -326,9 +325,9 @@ public class OptionsFactory {
         }
     }
 
-    private static Options getProxyInstance(Class<? extends Options> optionsClass, OptionsProxyHandler handler) {
-        return (Options) Proxy.newProxyInstance(optionsClass.getClassLoader(),
-                new Class<?>[]{optionsClass}, handler);
+    private static <T extends Options> T getProxyInstance(Class<T> optionsClass, OptionsProxyHandler handler) {
+        return optionsClass.cast(Proxy.newProxyInstance(optionsClass.getClassLoader(),
+                new Class<?>[] { optionsClass }, handler));
     }
 
     static void reset() {

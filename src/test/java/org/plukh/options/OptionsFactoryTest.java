@@ -48,13 +48,13 @@ public class OptionsFactoryTest {
 
     @Test
     public void testProxyInstantiation() throws InstantiationException, OptionsException {
-        Object o = OptionsFactory.getOptionsInstance(TestOptions.class);
-        assertTrue("getOptionsInstance() should return an instance of provided interface", o instanceof TestOptions);
+        TestOptions o = OptionsFactory.getOptionsInstance(TestOptions.class);
+        assertTrue("getOptionsInstance() should return an instance of provided interface", o != null);
     }
 
     @Test
     public void twoMethodsWithSameValueClassShouldCreateTwoDifferentOptions() throws OptionsException, InstantiationException {
-        TestOptions options = (TestOptions) OptionsFactory.getOptionsInstance(TestOptions.class);
+        TestOptions options = OptionsFactory.getOptionsInstance(TestOptions.class);
         options.setInt(1);
         options.setInt2(2);
         options.setInt(3);
@@ -64,8 +64,7 @@ public class OptionsFactoryTest {
 
     @Test
     public void uninitializedPrimitiveGettersShouldNotThrowNullPointerException() throws OptionsException {
-        PrimitiveGettersTestOptions options =
-                (PrimitiveGettersTestOptions) OptionsFactory.getOptionsInstance(PrimitiveGettersTestOptions.class);
+        PrimitiveGettersTestOptions options = OptionsFactory.getOptionsInstance(PrimitiveGettersTestOptions.class);
 
         try {
             assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(boolean.class), options.getBoolean());
@@ -121,28 +120,28 @@ public class OptionsFactoryTest {
     @SuppressWarnings("EqualsWithItself")
     @Test
     public void testEqualsCompareSameOptions() {
-        TestOptions options = (TestOptions) OptionsFactory.getOptionsInstance(TestOptions.class);
+        TestOptions options = OptionsFactory.getOptionsInstance(TestOptions.class);
         assertTrue(options.equals(options));
     }
 
     @SuppressWarnings("ObjectEqualsNull")
     @Test
     public void testEqualsCompareWithNull() {
-        TestOptions options = (TestOptions) OptionsFactory.getOptionsInstance(TestOptions.class);
+        TestOptions options = OptionsFactory.getOptionsInstance(TestOptions.class);
         assertFalse(options.equals(null));
     }
 
     @Test
     public void testEqualsCompareDifferentOptions() {
-        TestOptions options = (TestOptions) OptionsFactory.getOptionsInstance(TestOptions.class);
-        AnnotationTransientTestOptions options2 = (AnnotationTransientTestOptions) OptionsFactory.getOptionsInstance(AnnotationTransientTestOptions.class);
+        TestOptions options = OptionsFactory.getOptionsInstance(TestOptions.class);
+        AnnotationTransientTestOptions options2 = OptionsFactory.getOptionsInstance(AnnotationTransientTestOptions.class);
         assertFalse(options.equals(options2));
     }
 
     @Test
     public void optionsFactoryShouldCacheProxies() {
-        TestOptions options = (TestOptions) OptionsFactory.getOptionsInstance(TestOptions.class);
-        TestOptions sameOptions = (TestOptions) OptionsFactory.getOptionsInstance(TestOptions.class);
+        TestOptions options = OptionsFactory.getOptionsInstance(TestOptions.class);
+        TestOptions sameOptions = OptionsFactory.getOptionsInstance(TestOptions.class);
         assertSame(options, sameOptions);
         assertEquals(options, sameOptions);
     }
@@ -266,8 +265,7 @@ public class OptionsFactoryTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testElementClassForCollectionOption() {
-        ElementClassCollectionOptionTestOptions options = (ElementClassCollectionOptionTestOptions)
-                OptionsFactory.getOptionsInstance(ElementClassCollectionOptionTestOptions.class);
+        ElementClassCollectionOptionTestOptions options = OptionsFactory.getOptionsInstance(ElementClassCollectionOptionTestOptions.class);
         Collection c = options.getCollection();
         c.add(1);
         assertEquals(1, c.size());
@@ -283,8 +281,7 @@ public class OptionsFactoryTest {
 
     @Test
     public void collectionOptionsInstantiation() {
-        CollectionOptionsTestOptions options = (CollectionOptionsTestOptions)
-                OptionsFactory.getOptionsInstance(CollectionOptionsTestOptions.class);
+        CollectionOptionsTestOptions options = OptionsFactory.getOptionsInstance(CollectionOptionsTestOptions.class);
 
         //Assert backing implementations
         CollectionBackedOption c;
