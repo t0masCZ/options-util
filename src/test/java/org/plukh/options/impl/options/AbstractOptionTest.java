@@ -25,7 +25,10 @@ import org.plukh.options.ParseException;
 import java.util.LinkedList;
 import java.util.List;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 
 public class AbstractOptionTest {
     private AbstractOption integerOption;
@@ -34,7 +37,7 @@ public class AbstractOptionTest {
 
     @BeforeClass
     public static void setUpClass() {
-        //Make sure that OptionsFactory class is loaded, so that its static initializers will have a chance to run
+        //Make sure that OptionsFactory class is loaded, so that its static initializer will have a chance to run
         OptionsFactory.init();
     }
 
@@ -47,7 +50,7 @@ public class AbstractOptionTest {
 
     @Test
     public void assertEachOptionIsOfAppropriateClass() {
-        assertTrue("Option for class Integer should be instantiated as IntegerOption", integerOption instanceof IntegerOption);
+        assertTrue("Option for class Integer should be instantiated as NumberOption", integerOption instanceof NumberOption);
         assertTrue("Option for class Boolean should be instantiated as BooleanOption", booleanOption instanceof BooleanOption);
         assertTrue("Option for class String should be instantiated as StringOption", stringOption instanceof StringOption);
     }
@@ -55,23 +58,23 @@ public class AbstractOptionTest {
     @Test
     public void stringAssignmentShouldReturnAppropriateValue() {
         integerOption.setStringValue("1");
-        assertEquals("Assigning String value to IntegerOption should return correct integer value", 1, integerOption.getValue());
+        assertEquals("Assigning String value to AbstractOption should return correct integer value", 1, integerOption.getValue());
         stringOption.setStringValue("abc");
-        assertEquals("Assigning String value to StringOption should return correct String value", "abc", stringOption.getValue());
+        assertEquals("Assigning String value to AbstractOption should return correct String value", "abc", stringOption.getValue());
         booleanOption.setStringValue("true");
-        assertEquals("Assigning String value to BooleanOption should return correct Boolean value", true, booleanOption.getValue());
+        assertEquals("Assigning String value to AbstractOption should return correct Boolean value", true, booleanOption.getValue());
     }
 
     @Test
     public void valueAssignmentShouldReturnAppropriateString() {
         integerOption.setValue(1);
-        assertEquals("Assigning integer value to IntegerOption should return correct String representation", "1",
+        assertEquals("Assigning integer value to AbstractOption should return correct String representation", "1",
                 integerOption.getStringValue());
         booleanOption.setValue(true);
-        assertEquals("Assigning boolean value to BooleanOption should return correct String representation", "true",
+        assertEquals("Assigning boolean value to AbstractOption should return correct String representation", "true",
                 booleanOption.getStringValue());
         stringOption.setValue("abc");
-        assertEquals("Assigning string value to StringOption should return currect String representation", "abc",
+        assertEquals("Assigning string value to AbstractOption should return correct String representation", "abc",
                 stringOption.getStringValue());
     }
 
@@ -85,9 +88,9 @@ public class AbstractOptionTest {
 
     @Test
     public void stringToValueConversionsShouldBeCached() {
-        final List<String> conversionInvocations = new LinkedList<String>();
+        final List<String> conversionInvocations = new LinkedList<>();
 
-        AbstractOption option = new IntegerOption() {
+        AbstractOption option = new NumberOption(int.class) {
             public Object convertStringToValue(String s) throws ParseException {
                 conversionInvocations.add("convertStringToValue");
                 return super.convertStringToValue(s);
@@ -103,9 +106,9 @@ public class AbstractOptionTest {
 
     @Test
     public void valueToStringConversionsShouldBeCached() {
-        final List<String> conversionInvocations = new LinkedList<String>();
+        final List<String> conversionInvocations = new LinkedList<>();
 
-        AbstractOption option = new IntegerOption() {
+        AbstractOption option = new NumberOption(int.class) {
             public String convertValueToString(Object o) {
                 conversionInvocations.add("convertValueToString");
                 return super.convertValueToString(o);

@@ -20,7 +20,7 @@ import org.plukh.options.Option;
 import org.plukh.options.Options;
 
 public interface UnsupportedClassTestOptions extends Options {
-    @Option
-    Float getFloat();
-    void setFloat(Float value);
+    @SuppressWarnings("unused")
+    @Option(readOnly = true)
+    void getVoid();
 }

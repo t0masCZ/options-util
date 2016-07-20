@@ -22,24 +22,6 @@ public class BooleanOption extends AbstractOption {
     private static final String[] TRUE_STRINGS = {"yes", "true", "1"};
     private static final String[] FALSE_STRINGS = {"no", "false", "0"};
 
-    public BooleanOption() {
-    }
-
-    public BooleanOption(String key, String stringValue) {
-        super(key, stringValue);
-    }
-
-    public BooleanOption(String key, Boolean value) {
-        super(key);
-        this.value = value;
-        this.stringToValueConverted = true;
-        this.valueToStringConverted = false;
-    }
-
-    public BooleanOption(String key) {
-        super(key);
-    }
-
     @Override
     public Object convertStringToValue(String s) throws ParseException {
         if (s == null || s.isEmpty()) return null;

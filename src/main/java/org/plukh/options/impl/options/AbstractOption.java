@@ -16,6 +16,7 @@
 
 package org.plukh.options.impl.options;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.plukh.options.ParseException;
 import org.plukh.options.UnsupportedOptionClassException;
 import org.plukh.options.impl.collections.CollectionBackedOption;
@@ -34,22 +35,21 @@ import java.util.Map;
  * calls for all supported value classes.
  */
 public abstract class AbstractOption {
-    protected static final Map<Class, Class<? extends AbstractOption>> OPTION_CLASSES = new HashMap<Class, Class<? extends AbstractOption>>();
-    protected static final Map<Class<? extends Collection>, Class<? extends CollectionBackedOption>> COLLECTION_CLASSES = new HashMap
-            <Class<? extends Collection>, Class<? extends CollectionBackedOption>>();
+    private static final Map<Class, Class<? extends AbstractOption>> OPTION_CLASSES = new HashMap<>();
+    private static final Map<Class<? extends Collection>, Class<? extends CollectionBackedOption>> COLLECTION_CLASSES = new HashMap<>();
 
     protected String key;
-    protected String stringValue;
+    private String stringValue;
     protected Object value;
 
-    protected String defaultValue;
-    protected boolean isTransient;
+    private String defaultValue;
+    private boolean isTransient;
     protected boolean readOnly;
 
-    protected boolean defaultValueSet;
+    private boolean defaultValueSet;
 
-    protected boolean stringToValueConverted;
-    protected boolean valueToStringConverted;
+    boolean stringToValueConverted;
+    boolean valueToStringConverted;
 
     public AbstractOption() {
     }
@@ -66,9 +66,9 @@ public abstract class AbstractOption {
     }
 
     /**
-     * Converts string representation of the option into an actual object. This method takes a string respresentation
+     * Converts string representation of the option into an actual object. This method takes a string representation
      * of the object, parses it and returns an object instance of the class implemented by the subclass in question.
-     * Implementations should attemt to be lenient in their parsing, overlooking, to the extent possible, minor parsing
+     * Implementations should attempt to be lenient in their parsing, overlooking, to the extent possible, minor parsing
      * errors and inconsistencies, as it's expected that string values will be edited by end-users in a backing store
      * - such as a .properties file or a database - directly.
      *
@@ -91,12 +91,12 @@ public abstract class AbstractOption {
     public abstract String convertValueToString(Object o);
 
     /**
-     * Attemts to convert a string to value by calling {@link #convertStringToValue(String)}. Unlike
+     * Attempts to convert a string to value by calling {@link #convertStringToValue(String)}. Unlike
      * {@link #convertStringToValue(String)}, this method doesn't throw an exception if conversion is unsuccessful. Useful
      * for validating user input before assigning the string value to an option.
      * @return {@code true} if conversion is successful, {@code false} otherwise.
      */
-    public boolean tryStringToValueConversion() {
+    boolean tryStringToValueConversion() {
         try {
             getValue();
         } catch (ParseException e) {
@@ -247,21 +247,30 @@ public abstract class AbstractOption {
      * @throws UnsupportedOptionClassException if {@code clazz} is not supported by any of registered option classes.
      * @throws IllegalAccessException, InstantiationException if there is an error instantiating option class.
      */
-    public static AbstractOption getOptionForClass(Class clazz) throws UnsupportedOptionClassException, IllegalAccessException, InstantiationException {
+    public static AbstractOption getOptionForClass(Class<?> clazz) throws UnsupportedOptionClassException, IllegalAccessException, InstantiationException {
+        clazz = ClassUtils.primitiveToWrapper(clazz);
+
         Class<? extends AbstractOption> optionClass = OPTION_CLASSES.get(clazz);
 
-        /*
         if (optionClass == null) {
-            for (Class clazzFor: OPTION_CLASSES.keySet()) {
+            for (Class<?> clazzFor: OPTION_CLASSES.keySet()) {
                 if (clazzFor.isAssignableFrom(clazz)) {
                     optionClass = OPTION_CLASSES.get(clazzFor);
                 }
             }
-        }*/
+        }
 
         if (optionClass == null) throw new UnsupportedOptionClassException("There is no supported option class for " +
                 clazz.getName());
-        return optionClass.newInstance();
+        try {
+            return optionClass.newInstance();
+        } catch (Exception e) {
+            try {
+                return optionClass.getConstructor(Class.class).newInstance(clazz);
+            } catch (Exception e1) {
+                throw e;
+            }
+        }
     }
 
     public static CollectionOption getCollectionOption(Class elementClass, Class collectionClass) throws UnsupportedOptionClassException {
@@ -300,8 +309,13 @@ public abstract class AbstractOption {
         return defaultValueSet;
     }
 
-    protected boolean isValidOptionClass(Class clazz) {
-        return OPTION_CLASSES.containsKey(clazz);
+    boolean isValidOptionClass(Class clazz) {
+        try {
+            getOptionForClass(clazz);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override

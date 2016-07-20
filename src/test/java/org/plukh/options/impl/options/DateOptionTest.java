@@ -30,12 +30,12 @@ public class DateOptionTest {
 
     @Before
     public void setUp() {
-        option = new DateOption("key");
+        option = new DateOption();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void onlyDateShouldBeAssignable() {
-        option.setValue("thisshouldnotwork");
+        option.setValue("thisShouldNotWork");
     }
 
     @Test
@@ -58,7 +58,7 @@ public class DateOptionTest {
 
     @Test(expected = ParseException.class)
     public void conversionErrorShouldThrowAnException() {
-        option.convertStringToValue("aaaa");
+        option.convertStringToValue("thisShouldNotWork");
     }
 
     @Test

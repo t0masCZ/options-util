@@ -68,7 +68,17 @@ public class OptionsFactoryTest {
 
         try {
             assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(boolean.class), options.getBoolean());
-            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(int.class), options.getInt());
+            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(int.class), options.getIntPrimitive());
+            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(Integer.class), options.getInt());
+            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(short.class), options.getShortPrimitive());
+            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(Short.class), options.getShort());
+            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(long.class), options.getLongPrimitive());
+            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(Long.class), options.getLong());
+            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(float.class), options.getFloatPrimitive());
+            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(Float.class), options.getFloat());
+            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(byte.class), options.getBytePrimitive());
+            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(Byte.class), options.getByte());
+
         } catch (NullPointerException e) {
             e.printStackTrace();
             fail("Primitive getter had thrown an NPE");
@@ -77,7 +87,7 @@ public class OptionsFactoryTest {
 
     @Test
     public void unsupportedOptionClassShouldThrowAnException() throws InstantiationException {
-        testOptionsInstantiation(UnsupportedClassTestOptions.class, Float.class.getName(),
+        testOptionsInstantiation(UnsupportedClassTestOptions.class, "void",
                 "Expected exception not thrown for unsupported options class", "Class");
     }
 

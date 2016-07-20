@@ -20,7 +20,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.plukh.options.ParseException;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 
 public class BooleanOptionTest {
 
@@ -28,12 +31,12 @@ public class BooleanOptionTest {
 
     @Before
     public void setUp() {
-        option = new BooleanOption("key");
+        option = new BooleanOption();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void onlyBooleanIsAssignable() {
-        option.setValue("thisshouldfail");
+        option.setValue("thisShouldFail");
     }
 
     @Test
@@ -55,7 +58,7 @@ public class BooleanOptionTest {
 
     @Test(expected = ParseException.class)
     public void conversionErrorShouldThrowAnException() {
-        option.convertStringToValue("thisfails");
+        option.convertStringToValue("thisFails");
     }
 }
 

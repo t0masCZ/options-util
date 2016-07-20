@@ -22,26 +22,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DateOption extends AbstractOption {
-    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
+    private static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
     private final SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
-
-    public DateOption() {
-    }
-
-    public DateOption(String key, String stringValue) {
-        super(key, stringValue);
-    }
-
-    public DateOption(String key) {
-        super(key);
-    }
-
-    public DateOption(String key, Date value) {
-        super(key);
-        this.value = value;
-        this.stringToValueConverted = true;
-        this.valueToStringConverted = false;
-    }
 
     @Override
     public Object convertStringToValue(String s) throws ParseException {

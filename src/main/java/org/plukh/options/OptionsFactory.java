@@ -353,14 +353,11 @@ public class OptionsFactory {
     }
 
     private static void registerStandardOptionTypes() {
-        AbstractOption.registerOptionClassForType(int.class, IntegerOption.class);
-        AbstractOption.registerOptionClassForType(Integer.class, IntegerOption.class);
-        AbstractOption.registerOptionClassForType(boolean.class, BooleanOption.class);
         AbstractOption.registerOptionClassForType(Boolean.class, BooleanOption.class);
         AbstractOption.registerOptionClassForType(String.class, StringOption.class);
         AbstractOption.registerOptionClassForType(Date.class, DateOption.class);
-        AbstractOption.registerOptionClassForType(double.class, DoubleOption.class);
-        AbstractOption.registerOptionClassForType(Double.class, DoubleOption.class);
+
+        AbstractOption.registerOptionClassForType(Number.class, NumberOption.class);
     }
 
     private static void registerStandardCollectionTypes() {

@@ -21,10 +21,7 @@ import org.junit.Test;
 import org.plukh.options.OptionsException;
 import org.plukh.options.PersistenceProvider;
 import org.plukh.options.ProviderConfigurationException;
-import org.plukh.options.impl.options.AbstractOption;
-import org.plukh.options.impl.options.BooleanOption;
-import org.plukh.options.impl.options.IntegerOption;
-import org.plukh.options.impl.options.StringOption;
+import org.plukh.options.impl.options.*;
 import org.plukh.options.PersistenceConfig;
 import org.plukh.options.impl.persistence.PropertiesPersistenceProvider;
 import org.plukh.options.interfaces.TestOptions;
@@ -42,15 +39,16 @@ public class OptionsProxyHandlerTest {
     private static final String[] GETTERS = {"getInt", "getInt2", "getBoolean", "getString"};
     private static final String[] SETTERS = {"setInt", "setInt2", "setBoolean", "setString"};
     private static final Class[] SETTER_CLASSES = {int.class, int.class, boolean.class, String.class};
-    @SuppressWarnings("unchecked")
-    private static final Class<? extends AbstractOption>[] OPTION_CLASSES = new Class[] {IntegerOption.class, IntegerOption.class, BooleanOption.class,
-            StringOption.class};
+
+    private static final AbstractOption[] OPTION_CLASSES = new AbstractOption[] { new NumberOption(int.class), new NumberOption(int.class), new BooleanOption(),
+            new StringOption()};
 
     private static final String[] DEFAULT_VALUES = new String[] {"1", "2", "true", "1"};
 
     private TestOptions options;
     private OptionsProxyHandler handler;
     private Map<Method,AbstractOption> getters;
+    @SuppressWarnings("FieldCanBeLocal")
     private Map<Method,AbstractOption> setters;
 
     @Before
@@ -65,7 +63,7 @@ public class OptionsProxyHandlerTest {
         setters = new HashMap<>();
 
         for (int i = 0; i < GETTERS.length; ++i) {
-            AbstractOption option = OPTION_CLASSES[i].newInstance();
+            AbstractOption option = OPTION_CLASSES[i];
             option.setDefaultValue(DEFAULT_VALUES[i]);
             getters.put(TestOptions.class.getMethod(GETTERS[i]), option);
             setters.put(TestOptions.class.getMethod(SETTERS[i], SETTER_CLASSES[i]), option);

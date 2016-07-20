@@ -20,19 +20,6 @@ import org.plukh.options.ParseException;
 
 public class StringOption extends AbstractOption {
 
-    public StringOption() {
-    }
-
-    public StringOption(String key, String value) {
-        super(key, value);
-        this.valueToStringConverted = true;
-        this.stringToValueConverted = true;
-    }
-
-    public StringOption(String key) {
-        super(key);
-    }
-
     @Override
     public Object convertStringToValue(String s) throws ParseException {
         return s;

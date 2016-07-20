@@ -26,7 +26,7 @@ public class StringOptionTest {
 
     @Before
     public void setUp() {
-        option = new StringOption("key");
+        option = new StringOption();
     }
 
     //We can only assign objects of class String to StringOption

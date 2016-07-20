@@ -21,8 +21,25 @@ import org.plukh.options.Options;
 
 public interface PrimitiveGettersTestOptions extends Options  {
     @Option(readOnly = true)
-    int getInt();
+    int getIntPrimitive();
+    @Option(readOnly = true)
+    Integer getInt();
     @Option(readOnly = true)
     boolean getBoolean();
-    //TODO: Add other primitive types as they're developed
+    @Option(readOnly = true)
+    short getShortPrimitive();
+    @Option(readOnly = true)
+    Short getShort();
+    @Option(readOnly = true)
+    long getLongPrimitive();
+    @Option(readOnly = true)
+    Long getLong();
+    @Option(readOnly = true)
+    float getFloatPrimitive();
+    @Option(readOnly = true)
+    Float getFloat();
+    @Option(readOnly = true)
+    byte getBytePrimitive();
+    @Option(readOnly = true)
+    Byte getByte();
 }
