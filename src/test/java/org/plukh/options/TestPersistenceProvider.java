@@ -22,6 +22,10 @@ import java.util.Collection;
 
 public class TestPersistenceProvider implements PersistenceProvider {
     @Override
+    public void init(Class<? extends Options> classForPersisting) {
+    }
+
+    @Override
     public void configure(PersistenceConfig configuration) {
         //Do nothing
     }

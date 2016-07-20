@@ -47,12 +47,9 @@ public class OptionsProxyHandler implements InvocationHandler, Options, Persiste
         DEFAULT_PRIMITIVE_VALUES.put(char.class, '\u0000');
     }
 
-    private Class<? extends Options> optionsClass;
-
     private PersistenceProvider persistenceProvider;
 
-    public OptionsProxyHandler(Class<? extends Options> optionsClass, Map<Method, AbstractOption> getters, Map<Method, AbstractOption> setters, PersistenceProvider persistenceProvider) throws NoSuchMethodException {
-        this.optionsClass = optionsClass;
+    public OptionsProxyHandler(Map<Method, AbstractOption> getters, Map<Method, AbstractOption> setters, PersistenceProvider persistenceProvider) throws NoSuchMethodException {
         this.getters = getters;
         this.setters = setters;
         this.methodsMapping = createMethodsMapping();
@@ -133,7 +130,6 @@ public class OptionsProxyHandler implements InvocationHandler, Options, Persiste
 
     @Override
     public synchronized void configurePersistenceProvider(PersistenceConfig configuration) throws ProviderConfigurationException {
-        configuration.setOptionsClass(optionsClass);
         persistenceProvider.configure(configuration);
     }
 

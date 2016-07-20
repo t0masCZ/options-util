@@ -71,7 +71,7 @@ public class OptionsProxyHandlerTest {
             setters.put(TestOptions.class.getMethod(SETTERS[i], SETTER_CLASSES[i]), option);
         }
 
-        handler = new OptionsProxyHandler(TestOptions.class, getters, setters, new PropertiesPersistenceProvider());
+        handler = new OptionsProxyHandler(getters, setters, new PropertiesPersistenceProvider());
     }
 
     private void createProxy() {
@@ -148,7 +148,7 @@ public class OptionsProxyHandlerTest {
         PersistenceProvider pp = getMockPersistenceProvider();
         handler.setPersistenceProvider(pp);
 
-        PersistenceConfig config = new PersistenceConfig(TestOptions.class);
+        PersistenceConfig config = new PersistenceConfig();
 
         pp.configure(config);
         replay(pp);

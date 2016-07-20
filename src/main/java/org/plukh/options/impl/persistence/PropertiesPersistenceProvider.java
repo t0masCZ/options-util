@@ -75,10 +75,13 @@ public class PropertiesPersistenceProvider implements StreamPersistenceProvider 
     }
 
     @Override
-    public void configure(PersistenceConfig configuration) throws ProviderConfigurationException {
-        //Options class is always available
-        optionsClass = configuration.getOptionsClass();
+    public void init(Class<? extends Options> classForPersisting) {
+        optionsClass = classForPersisting;
+        setupOptionsFile();
+    }
 
+    @Override
+    public void configure(PersistenceConfig configuration) throws ProviderConfigurationException {
         //Configure file-related parameters
         configureFileConfig(configuration);
 

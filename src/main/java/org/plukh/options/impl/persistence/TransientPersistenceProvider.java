@@ -16,10 +16,7 @@
 
 package org.plukh.options.impl.persistence;
 
-import org.plukh.options.OptionsException;
-import org.plukh.options.PersistenceConfig;
-import org.plukh.options.PersistenceProvider;
-import org.plukh.options.ProviderConfigurationException;
+import org.plukh.options.*;
 import org.plukh.options.impl.options.AbstractOption;
 
 import java.util.Collection;
@@ -29,6 +26,10 @@ import java.util.Collection;
  * application-specifc options interfaces without {@link org.plukh.options.Persistence @Persistence} annotation.
  */
 public class TransientPersistenceProvider implements PersistenceProvider {
+    @Override
+    public void init(Class<? extends Options> classForPersisting) {
+    }
+
     @Override
     public void configure(PersistenceConfig configuration) throws ProviderConfigurationException {
     }

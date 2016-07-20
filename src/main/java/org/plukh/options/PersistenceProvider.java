@@ -34,6 +34,14 @@ import java.util.Collection;
  * @see org.plukh.options.impl.options
  */
 public interface PersistenceProvider {
+
+    /**
+     * Initializing persistence provider
+     *
+     * @param classForPersisting class for persisting
+     */
+    void init(Class<? extends Options> classForPersisting);
+
     /**
      * Called by the proxy object to pass on information which can be used to configure this persistence provider.
      * Classes implementing this interface should clearly state what object class they expect for

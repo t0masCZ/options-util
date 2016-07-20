@@ -17,17 +17,4 @@
 package org.plukh.options;
 
 public class PersistenceConfig {
-    private Class<? extends Options> optionsClass;
-
-    public PersistenceConfig(Class<? extends Options> optionsClass) {
-        this.optionsClass = optionsClass;
-    }
-
-    public Class<? extends Options> getOptionsClass() {
-        return optionsClass;
-    }
-
-    public void setOptionsClass(Class<? extends Options> optionsClass) {
-        this.optionsClass = optionsClass;
-    }
 }

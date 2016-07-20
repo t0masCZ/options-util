@@ -16,11 +16,9 @@
 
 package org.plukh.options.impl.persistence;
 
-import org.plukh.options.Options;
 import org.plukh.options.PersistenceConfig;
 
 public class FakeConfig extends PersistenceConfig {
-    public FakeConfig(Class<? extends Options> optionsClass) {
-        super(optionsClass);
+    public FakeConfig() {
     }
 }

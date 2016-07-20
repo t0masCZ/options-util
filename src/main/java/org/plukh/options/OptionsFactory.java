@@ -318,12 +318,14 @@ public class OptionsFactory {
 
         try {
             provider = (PersistenceProvider) providerClass.newInstance();
-            provider.configure(new PersistenceConfig(optionsClass));
+            provider.init(optionsClass);
+            //TODO: add configuration to annotation
+            //provider.configure(new PersistenceConfig(optionsClass));
         } catch (InstantiationException | IllegalAccessException e) {
             throw new OptionsException("Error instantiating persistence provider for class: " + providerClass.getName(), e);
-        } catch (ProviderConfigurationException e) {
+        } /*catch (ProviderConfigurationException e) {
             throw new OptionsException("Error applying default provider configuration", e);
-        }
+        }*/
 
         return provider;
     }
@@ -331,7 +333,7 @@ public class OptionsFactory {
     private static OptionsProxyHandler createHandler(Class<? extends Options> optionsClass, Map<Method, AbstractOption> gettersWithOptions,
                                                        Map<Method, AbstractOption> settersWithOptions, PersistenceProvider pp) throws OptionsException {
         try {
-            return new OptionsProxyHandler(optionsClass, gettersWithOptions, settersWithOptions, pp);
+            return new OptionsProxyHandler(gettersWithOptions, settersWithOptions, pp);
         } catch (NoSuchMethodException e) {
             throw new OptionsException("Internal options handler error", e);
         }

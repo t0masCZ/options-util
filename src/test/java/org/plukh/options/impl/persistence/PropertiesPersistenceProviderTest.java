@@ -27,7 +27,7 @@ import org.plukh.options.interfaces.TestOptions;
 import java.io.*;
 import java.util.Properties;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 
 public class PropertiesPersistenceProviderTest {
     private PropertiesPersistenceProvider provider;
@@ -42,14 +42,13 @@ public class PropertiesPersistenceProviderTest {
 
     @Test(expected = ProviderConfigurationException.class)
     public void wrongConfigClassShouldThrowException() throws ProviderConfigurationException {
-        FakeConfig pc = new FakeConfig(TestOptions.class);
+        FakeConfig pc = new FakeConfig();
         provider.configure(pc);
     }
 
     @Test
     public void testDefaultInitialization() throws ProviderConfigurationException {
-        PersistenceConfig pc = new PersistenceConfig(TestOptions.class);
-        provider.configure(pc);
+        provider.init(TestOptions.class);
 
         //Assert class is configured properly
         assertEquals(TestOptions.class, provider.getOptionsClass());
@@ -108,7 +107,7 @@ public class PropertiesPersistenceProviderTest {
 
     @Test
     public void testOptionLoad() throws OptionsException, IOException {
-        DefaultValueTestOptions options = (DefaultValueTestOptions) OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
+        DefaultValueTestOptions options = OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
 
         InputStream in = getClass().getResourceAsStream("properties/DefaultValueTestOptions.properties");
 
@@ -121,7 +120,7 @@ public class PropertiesPersistenceProviderTest {
     public void optionWithDefaultValueShouldNotBeSavedWhenSaveNonDefaultOnlyIsTrue() throws OptionsException,
             IOException {
 
-        DefaultValueTestOptions options = (DefaultValueTestOptions) OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
+        DefaultValueTestOptions options = OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
         assertEquals(1, options.getValue());
 
         saveOptionsAndCompareResult(options, true, "properties/EmptyProperties.properties");
@@ -129,7 +128,7 @@ public class PropertiesPersistenceProviderTest {
 
     @Test
     public void optionWithNonDefaultValueShouldBeSavedRegardless() throws OptionsException, IOException {
-        DefaultValueTestOptions options = (DefaultValueTestOptions) OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
+        DefaultValueTestOptions options = OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
         assertEquals(1, options.getValue());
         options.setValue(5);
 
@@ -139,7 +138,7 @@ public class PropertiesPersistenceProviderTest {
 
     @Test
     public void optionWithDefaultValueShouldBeSavedWhenSaveNonDefaultOnlyIsFalse() throws OptionsException, IOException {
-        DefaultValueTestOptions options = (DefaultValueTestOptions) OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
+        DefaultValueTestOptions options = OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
         assertEquals(1, options.getValue());
 
         saveOptionsAndCompareResult(options, false, "properties/DefaultValueSavedTestOptions.properties");
@@ -147,7 +146,7 @@ public class PropertiesPersistenceProviderTest {
 
     @Test
     public void transientOptionShouldNotBeSaved() throws OptionsException, IOException {
-        TransientOptionTestOptions options = (TransientOptionTestOptions) OptionsFactory.getOptionsInstance(TransientOptionTestOptions.class);
+        TransientOptionTestOptions options = OptionsFactory.getOptionsInstance(TransientOptionTestOptions.class);
         options.setTransientOption(10);
 
         saveOptionsAndCompareResult(options, false, "properties/EmptyProperties.properties");
@@ -155,7 +154,7 @@ public class PropertiesPersistenceProviderTest {
 
     @Test
     public void transientOptionShouldNotBeLoaded() throws OptionsException {
-        TransientOptionTestOptions options = (TransientOptionTestOptions) OptionsFactory.getOptionsInstance(TransientOptionTestOptions.class);
+        TransientOptionTestOptions options = OptionsFactory.getOptionsInstance(TransientOptionTestOptions.class);
         options.setTransientOption(10);
         loadOptionsFromProperties(options, false, "properties/TransientOptionTestOptions.properties");
         assertEquals(10, options.getTransientOption());
@@ -163,21 +162,21 @@ public class PropertiesPersistenceProviderTest {
 
     @Test
     public void readOnlyOptionShouldBeSavedLikeNormalOption() throws IOException, OptionsException {
-        ReadOnlyTestOptions options = (ReadOnlyTestOptions) OptionsFactory.getOptionsInstance(ReadOnlyTestOptions.class);
+        ReadOnlyTestOptions options = OptionsFactory.getOptionsInstance(ReadOnlyTestOptions.class);
         saveOptionsAndCompareResult(options, false, "properties/ReadOnlySavedTestOptions.properties");
         saveOptionsAndCompareResult(options, true, "properties/EmptyProperties.properties");
     }
 
     @Test
     public void readOnlyOptionShouldBeLoadedLikeNormalOption() throws OptionsException {
-        ReadOnlyTestOptions options = (ReadOnlyTestOptions) OptionsFactory.getOptionsInstance(ReadOnlyTestOptions.class);
+        ReadOnlyTestOptions options = OptionsFactory.getOptionsInstance(ReadOnlyTestOptions.class);
         loadOptionsFromProperties(options, false, "properties/ReadOnlyTestOptions.properties");
         assertEquals(5, options.getReadOnlyOption());
     }
 
     @Test
-    public void conversionErrorShouldThrowAnExceptionIfNotSupressed() throws OptionsException {
-        DefaultValueTestOptions options = (DefaultValueTestOptions) OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
+    public void conversionErrorShouldThrowAnExceptionIfNotSuppressed() throws OptionsException {
+        DefaultValueTestOptions options = OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
         try {
             loadOptionsFromProperties(options, false, "properties/DefaultValueConversionErrorTestOptions.properties");
             fail("Expected conversion exception not thrown");
@@ -189,8 +188,8 @@ public class PropertiesPersistenceProviderTest {
     }
 
     @Test
-    public void conversionErrorShouldNotThrowAnExceptionIfSupressed() throws OptionsException {
-        DefaultValueTestOptions options = (DefaultValueTestOptions) OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
+    public void conversionErrorShouldNotThrowAnExceptionIfSuppressed() throws OptionsException {
+        DefaultValueTestOptions options = OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
         options.setValue(10);
         try {
             loadOptionsFromProperties(options, true, "properties/DefaultValueConversionErrorTestOptions.properties");
@@ -203,7 +202,7 @@ public class PropertiesPersistenceProviderTest {
 
     @Test
     public void optionsMissingFromTheStoreShouldBeResetToDefaultOnLoad() throws OptionsException {
-        DefaultValueTestOptions options = (DefaultValueTestOptions) OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
+        DefaultValueTestOptions options = OptionsFactory.getOptionsInstance(DefaultValueTestOptions.class);
         options.setValue(10);
         loadOptionsFromProperties(options, false, "properties/EmptyProperties.properties");
         assertEquals(1, options.getValue());
@@ -211,7 +210,7 @@ public class PropertiesPersistenceProviderTest {
 
     private void testPathConfig(String path, String filename, String expectedPath) throws ProviderConfigurationException {
         FileConfig fc = new FileConfig(path, filename);
-        fc.setOptionsClass(TestOptions.class);
+        provider.init(TestOptions.class);
         provider.configure(fc);
         assertEquals(expectedPath, provider.getOptionsFile().getAbsolutePath());
     }
@@ -233,11 +232,11 @@ public class PropertiesPersistenceProviderTest {
         TestUtils.assertMapsMatch(expectedProps, actualProps);
     }
 
-    private void loadOptionsFromProperties(PersistenceOptions options, boolean supressConversionErrors, String expectedPropsFileName)
+    private void loadOptionsFromProperties(PersistenceOptions options, boolean suppressConversionErrors, String expectedPropsFileName)
             throws OptionsException {
 
         InputStream in = getClass().getResourceAsStream(expectedPropsFileName);
-        options.loadFromStream(in, supressConversionErrors);
+        options.loadFromStream(in, suppressConversionErrors);
     }
 
 }

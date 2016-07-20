@@ -28,13 +28,11 @@ public class FileConfig extends PersistenceConfig {
     private boolean backupOnSave;
 
     public FileConfig(String path, String filename) {
-        super(null);
         this.path = path;
         this.filename = filename;
     }
 
     public FileConfig(String path, String filename, boolean backupOnSave) {
-        super(null);
         this.path = path;
         this.filename = filename;
         this.backupOnSave = backupOnSave;
