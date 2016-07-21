@@ -16,9 +16,9 @@
 
 package org.plukh.options.impl.options;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.plukh.options.ParseException;
 import org.plukh.options.UnsupportedOptionClassException;
+import org.plukh.options.impl.PrimitivesUtils;
 import org.plukh.options.impl.collections.CollectionBackedOption;
 
 import java.util.Collection;
@@ -255,7 +255,7 @@ public abstract class AbstractOption {
      * @throws IllegalAccessException, InstantiationException if there is an error instantiating option class.
      */
     public static AbstractOption getOptionForClass(Class<?> clazz) throws UnsupportedOptionClassException, IllegalAccessException, InstantiationException {
-        clazz = ClassUtils.primitiveToWrapper(clazz);
+        clazz = PrimitivesUtils.primitiveToWrapper(clazz);
 
         Class<? extends AbstractOption> optionClass = OPTION_CLASSES.get(clazz);
 

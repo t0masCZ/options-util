@@ -1,8 +1,7 @@
 package org.plukh.options.impl.options;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.plukh.options.ParseException;
-import org.plukh.options.impl.ConverterFromString;
+import org.plukh.options.impl.PrimitivesUtils;
 
 import java.util.function.Function;
 
@@ -14,8 +13,8 @@ public class NumberOption extends AbstractOption {
     private final Function<String, Object> converter;
 
     public NumberOption(Class<?> clazz) {
-        super(ClassUtils.primitiveToWrapper(clazz));
-        converter = ConverterFromString.getConverter(clazz);
+        super(PrimitivesUtils.primitiveToWrapper(clazz));
+        converter = PrimitivesUtils.getStringConverter(clazz);
     }
 
     @Override
