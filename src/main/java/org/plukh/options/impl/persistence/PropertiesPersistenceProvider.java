@@ -21,6 +21,9 @@ import org.plukh.options.impl.options.AbstractOption;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 /**
@@ -59,7 +62,7 @@ import java.util.*;
  *     System.getProperty("user.home")};</li>
  *     <li>options filename: fully-qualified class name of the interface to which this instance of persistence provider
  *     is attached, combined with {@code .properties} extension (for example,
- *     {@code com.mycompany.myproject.MyOptions.properties});</li>
+ *     {@code com.company.project.MyOptions.properties});</li>
  *     <li>backup of options file is disabled.</li>
  * </ul>
  */
@@ -112,7 +115,8 @@ public class PropertiesPersistenceProvider implements StreamPersistenceProvider 
         if (optionsFile.exists() && optionsFile.isFile()) {
             if (backupOnSave) {
                 try {
-                    FileUtils.copyFile(optionsFile, new File(optionsFile.getAbsolutePath() + ".bak"));
+                    Files.copy(optionsFile.toPath(), Paths.get(optionsFile.getAbsolutePath() + ".bak"), StandardCopyOption.REPLACE_EXISTING);
+
                 } catch (IOException e) {
                     throw new OptionsException("Error making backup copy of options file: " +
                             optionsFile.getAbsolutePath(), e);
@@ -199,7 +203,7 @@ public class PropertiesPersistenceProvider implements StreamPersistenceProvider 
         //Try string to value conversion, collection conversion errors
         final Collection<String> conversionErrors = tryConvertingStringsToValues(options, properties);
 
-        //If there are conversion errors and they are not supressed, throw an exception
+        //If there are conversion errors and they are not suppressed, throw an exception
         if (!conversionErrors.isEmpty() && !suppressConversionErrors)
             throw new ConversionException("Error converting option values from options file: " +
                     optionsFile.getAbsolutePath() + ": " + conversionErrors, conversionErrors);
@@ -222,7 +226,7 @@ public class PropertiesPersistenceProvider implements StreamPersistenceProvider 
     private Collection<String> tryConvertingStringsToValues(Collection<AbstractOption> options,
                                                             Map<String, String> properties) {
 
-        final Collection<String> conversionErrors = new LinkedList<String>();
+        final Collection<String> conversionErrors = new LinkedList<>();
 
         for (AbstractOption option : options) {
             final String key = option.getKey();
@@ -244,7 +248,7 @@ public class PropertiesPersistenceProvider implements StreamPersistenceProvider 
     private Map<String, String> loadPropertiesFromStream(InputStream in) throws OptionsException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF8")));
 
-        final Map<String, String> properties = new HashMap<String, String>();
+        final Map<String, String> properties = new HashMap<>();
 
         try {
             String s;
@@ -300,23 +304,23 @@ public class PropertiesPersistenceProvider implements StreamPersistenceProvider 
         optionsFile = new File(path, filename);
     }
 
-    public Class<? extends Options> getOptionsClass() {
+    Class<? extends Options> getOptionsClass() {
         return optionsClass;
     }
 
-    public String getPath() {
+    String getPath() {
         return path;
     }
 
-    public String getFilename() {
+    String getFilename() {
         return filename;
     }
 
-    public File getOptionsFile() {
+    File getOptionsFile() {
         return optionsFile;
     }
 
-    public boolean isBackupOnSave() {
+    boolean isBackupOnSave() {
         return backupOnSave;
     }
 }
