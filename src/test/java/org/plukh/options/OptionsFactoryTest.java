@@ -22,7 +22,7 @@ import org.plukh.options.impl.OptionsProxyHandler;
 import org.plukh.options.impl.collections.CollectionBackedOption;
 import org.plukh.options.impl.collections.OptionsQueue;
 import org.plukh.options.impl.options.AbstractOption;
-import org.plukh.options.impl.options.NonConvertableOption;
+import org.plukh.options.impl.options.NonConvertibleOption;
 import org.plukh.options.impl.persistence.OptionsAccessPersistenceProvider;
 import org.plukh.options.impl.persistence.PropertiesPersistenceProvider;
 import org.plukh.options.impl.persistence.TransientPersistenceProvider;
@@ -240,7 +240,7 @@ public class OptionsFactoryTest {
     public void transientOptionOfNonSupportedClassShouldGetNonConvertibleOption() throws OptionsException,
             InstantiationException {
         AbstractOption option = getSingleOptionInstance(TransientUnsupportedClassTestOptions.class);
-        assertTrue("Option of unsupported class should be backed by NonConvertibleOption", option instanceof NonConvertableOption);
+        assertTrue("Option of unsupported class should be backed by NonConvertibleOption", option instanceof NonConvertibleOption);
     }
 
     //Collection option tests

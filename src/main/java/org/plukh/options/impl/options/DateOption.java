@@ -25,6 +25,10 @@ public class DateOption extends AbstractOption {
     private static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
     private final SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
 
+    DateOption() {
+        super(Date.class);
+    }
+
     @Override
     public Object convertStringToValue(String s) throws ParseException {
         if (s == null || s.isEmpty()) return null;
@@ -37,13 +41,9 @@ public class DateOption extends AbstractOption {
 
     @Override
     public String convertValueToString(Object o) {
-        if (o == null) return null;
+        if (o == null) {
+            return null;
+        }
         return sdf.format((Date)o);
-    }
-
-    @Override
-    public void setValue(Object value) {
-        if (value != null && !(value instanceof Date)) throw new IllegalArgumentException("Can only set value to java.util.Date");
-        super.setValue(value);
     }
 }

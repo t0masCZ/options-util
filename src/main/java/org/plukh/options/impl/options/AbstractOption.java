@@ -24,6 +24,9 @@ import org.plukh.options.impl.collections.CollectionBackedOption;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+
+import static java.text.MessageFormat.format;
 
 /**
  * Abstract superclass for all other options classes. Option classes for specific option types must extend this
@@ -51,18 +54,10 @@ public abstract class AbstractOption {
     boolean stringToValueConverted;
     boolean valueToStringConverted;
 
-    public AbstractOption() {
-    }
+    private final Class<?> optionClass;
 
-    public AbstractOption(String key, String stringValue) {
-        this.key = key;
-        this.stringValue = stringValue;
-        this.stringToValueConverted = false;
-        this.valueToStringConverted = true;
-    }
-
-    public AbstractOption(String key) {
-        this.key = key;
+    public AbstractOption(Class<?> optionClass) {
+        this.optionClass = Objects.requireNonNull(optionClass);
     }
 
     /**
@@ -88,7 +83,12 @@ public abstract class AbstractOption {
      * @param o an object to be converted to a string
      * @return string representation of the object
      */
-    public abstract String convertValueToString(Object o);
+    public String convertValueToString(Object o) {
+        if (o == null) {
+            return null;
+        }
+        return o.toString();
+    }
 
     /**
      * Attempts to convert a string to value by calling {@link #convertStringToValue(String)}. Unlike
@@ -121,6 +121,10 @@ public abstract class AbstractOption {
         stringToValueConverted = true;
 
         return value;
+    }
+
+    Class<?> getOptionClass() {
+        return optionClass;
     }
 
     /**
@@ -200,6 +204,9 @@ public abstract class AbstractOption {
      * @param value value to set.
      */
     public void setValue(Object value) {
+        if (value != null && !(optionClass.isAssignableFrom(value.getClass()))) {
+            throw new IllegalArgumentException(format("Can only set value to {0}", optionClass.getSimpleName()));
+        }
         this.value = value;
         stringValue = null;
         valueToStringConverted = false;
@@ -260,8 +267,9 @@ public abstract class AbstractOption {
             }
         }
 
-        if (optionClass == null) throw new UnsupportedOptionClassException("There is no supported option class for " +
-                clazz.getName());
+        if (optionClass == null) {
+            throw new UnsupportedOptionClassException(format("There is no supported option class for {0}", clazz.getName()));
+        }
         try {
             return optionClass.newInstance();
         } catch (Exception e) {
@@ -275,18 +283,18 @@ public abstract class AbstractOption {
 
     public static CollectionOption getCollectionOption(Class elementClass, Class collectionClass) throws UnsupportedOptionClassException {
         Class optionCollectionClass = COLLECTION_CLASSES.get(collectionClass);
-        if (optionCollectionClass == null)
-            throw new UnsupportedOptionClassException("There is no supported options collection class for " +
-                    collectionClass.getName());
+        if (optionCollectionClass == null) {
+            throw new UnsupportedOptionClassException(format("There is no supported options collection class for {0}", collectionClass.getName()));
+        }
         return collectionClass.isInterface() ? new CollectionOption(elementClass, optionCollectionClass) :
                                                new CollectionOption(collectionClass, elementClass, optionCollectionClass, collectionClass);
     }
 
     public static CollectionOption getCollectionOption(Class elementClass, Class collectionClass, Class backingClass) throws UnsupportedOptionClassException {
         Class optionCollectionClass = COLLECTION_CLASSES.get(collectionClass);
-        if (optionCollectionClass == null)
-            throw new UnsupportedOptionClassException("There is no supported options collection class for " +
-                    collectionClass.getName());
+        if (optionCollectionClass == null) {
+            throw new UnsupportedOptionClassException(format("There is no supported options collection class for {0}", collectionClass.getName()));
+        }
         return new CollectionOption(collectionClass, elementClass, optionCollectionClass, backingClass);
     }
 

@@ -22,6 +22,10 @@ public class BooleanOption extends AbstractOption {
     private static final String[] TRUE_STRINGS = {"yes", "true", "1"};
     private static final String[] FALSE_STRINGS = {"no", "false", "0"};
 
+    public BooleanOption() {
+        super(Boolean.class);
+    }
+
     @Override
     public Object convertStringToValue(String s) throws ParseException {
         if (s == null || s.isEmpty()) return null;
@@ -36,14 +40,9 @@ public class BooleanOption extends AbstractOption {
 
     @Override
     public String convertValueToString(Object o) {
-        if (o == null) return null;
+        if (o == null) {
+            return null;
+        }
         return (Boolean) o ? "true" : "false";
     }
-
-    @Override
-    public void setValue(Object value) {
-        if (value != null && !(value instanceof Boolean)) throw new IllegalArgumentException("Can only set value to Boolean");
-        super.setValue(value);
-    }
 }
-

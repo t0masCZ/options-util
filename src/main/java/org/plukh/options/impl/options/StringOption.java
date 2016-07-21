@@ -20,19 +20,12 @@ import org.plukh.options.ParseException;
 
 public class StringOption extends AbstractOption {
 
+    public StringOption() {
+        super(String.class);
+    }
+
     @Override
     public Object convertStringToValue(String s) throws ParseException {
         return s;
-    }
-
-    @Override
-    public String convertValueToString(Object o) {
-        return (String) o;
-    }
-
-    @Override
-    public void setValue(Object value) {
-        if (value != null && !(value instanceof String)) throw new IllegalArgumentException("Can only set value to String");
-        super.setValue(value);
     }
 }

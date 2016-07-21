@@ -6,14 +6,15 @@ import org.plukh.options.impl.ConverterFromString;
 
 import java.util.function.Function;
 
+import static java.text.MessageFormat.format;
+
 
 public class NumberOption extends AbstractOption {
 
-    private final Class<?> clazz;
     private final Function<String, Object> converter;
 
     public NumberOption(Class<?> clazz) {
-        this.clazz = ClassUtils.primitiveToWrapper(clazz);
+        super(ClassUtils.primitiveToWrapper(clazz));
         converter = ConverterFromString.getConverter(clazz);
     }
 
@@ -23,23 +24,7 @@ public class NumberOption extends AbstractOption {
         try {
             return converter.apply(s);
         } catch (NumberFormatException e) {
-            throw new ParseException("Error converting string: " + s + " to integer value", e);
+            throw new ParseException(format("Error converting string: {0} to {1} value", s, getOptionClass().getSimpleName()), e);
         }
-    }
-
-    @Override
-    public String convertValueToString(Object o) {
-        if (o == null) {
-            return null;
-        }
-        return o.toString();
-    }
-
-    @Override
-    public void setValue(Object value) {
-        if (value != null && !(clazz.isAssignableFrom(value.getClass()))) {
-            throw new IllegalArgumentException("Can only set value to Integer");
-        }
-        super.setValue(value);
     }
 }

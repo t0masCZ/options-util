@@ -31,9 +31,8 @@ public class CollectionOption extends AbstractOption {
     private static final Pattern ESCAPE_PATTERN = Pattern.compile("([^:\\\\]*)([:\\\\])");
     private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([:\\\\])");
 
-    private Class elementClass;
-
-    public CollectionOption(Class elementClass, Class optionsCollectionClass) {
+    public CollectionOption(Class<?> elementClass, Class<?> optionsCollectionClass) {
+        super(elementClass);
         //Validate parameters
         if (!isValidOptionClass(elementClass)) throw new IllegalArgumentException("Class " + elementClass.getName() +
             " is not a valid option class");
@@ -42,7 +41,6 @@ public class CollectionOption extends AbstractOption {
             throw new IllegalArgumentException("Class " + optionsCollectionClass.getName() +
                 " is not a valid collection class (valid collection classes must implement CollectionBackedOption interface)");
 
-        this.elementClass = elementClass;
         try {
             Constructor constructor = optionsCollectionClass.getConstructor(Class.class);
             value = constructor.newInstance(elementClass);
@@ -57,7 +55,8 @@ public class CollectionOption extends AbstractOption {
         setReadOnly(true);
     }
 
-    public CollectionOption(Class collectionClass, Class elementClass, Class optionsCollectionClass, Class backingClass) {
+    public CollectionOption(Class<?> collectionClass, Class<?> elementClass, Class<?> optionsCollectionClass, Class<?> backingClass) {
+        super(elementClass);
         //Validate parameters
         if (!isValidOptionClass(elementClass)) throw new IllegalArgumentException("Class " + elementClass.getName() +
                 " is not a valid option class");
@@ -70,8 +69,6 @@ public class CollectionOption extends AbstractOption {
             throw new IllegalArgumentException("Class " + backingClass.getName() + " cannot be used as a backing class for " +
                     " options collection class " + collectionClass.getName() + ", not assignment-compatible");
 
-        this.elementClass = elementClass;
-
         try {
             Constructor constructor = optionsCollectionClass.getConstructor(Class.class, Class.class);
             value = constructor.newInstance(elementClass, backingClass);
@@ -83,15 +80,6 @@ public class CollectionOption extends AbstractOption {
         }
     }
 
-    private CollectionOption() {
-    }
-
-    private CollectionOption(String key, String stringValue) {
-    }
-
-    private CollectionOption(String key) {
-    }
-
     @Override
     public Object convertStringToValue(String s) throws ParseException {
         return null;
@@ -101,19 +89,17 @@ public class CollectionOption extends AbstractOption {
     public String convertValueToString(Object o) {
         if (o == null) return null;
         if (!(o instanceof CollectionBackedOption))
-            throw new IllegalArgumentException("Can only converrt values implementing CollectionBackedOption interface");
+            throw new IllegalArgumentException("Can only convert values implementing CollectionBackedOption interface");
 
         Collection collection = ((CollectionBackedOption)o).getBackingCollection();
 
         AbstractOption option;
         try {
-            option = AbstractOption.getOptionForClass(elementClass);
+            option = AbstractOption.getOptionForClass(getOptionClass());
         } catch (UnsupportedOptionClassException e) {
-            throw new IllegalArgumentException("Collection element class is unsupported, weird: " + elementClass.getName());
-        } catch (IllegalAccessException e) {
-            throw new OptionConversionException("Error instantiating option for class: " + elementClass.getName(), e);
-        } catch (InstantiationException e) {
-            throw new OptionConversionException("Error instantiating option for class: " + elementClass.getName(), e);
+            throw new IllegalArgumentException("Collection element class is unsupported, weird: " + getOptionClass().getName());
+        } catch (IllegalAccessException | InstantiationException e) {
+            throw new OptionConversionException("Error instantiating option for class: " + getOptionClass().getName(), e);
         }
 
         StringBuilder sb = new StringBuilder();
@@ -126,8 +112,8 @@ public class CollectionOption extends AbstractOption {
 
             if (value != null) {
                 //Obtain a compatible option class
-                if (!elementClass.isInstance(value)) throw new IllegalArgumentException("Collection element " +
-                        value.toString() + " is not instance of the element class " + elementClass.getName());
+                if (!getOptionClass().isInstance(value)) throw new IllegalArgumentException("Collection element " +
+                        value.toString() + " is not instance of the element class " + getOptionClass().getName());
 
                 //Convert value to string; escape the converted string
                 final String string = escapeString(option.convertValueToString(value));
@@ -143,7 +129,7 @@ public class CollectionOption extends AbstractOption {
         return sb.toString();
     }
 
-    public String escapeString(String string) {
+    String escapeString(String string) {
         if (string == null) return null;
 
         StringBuffer sb = new StringBuffer();
@@ -158,7 +144,7 @@ public class CollectionOption extends AbstractOption {
         return sb.toString();
     }
 
-    public String unescapeString(String string) {
+    String unescapeString(String string) {
         if (string == null) return null;
 
         StringBuffer sb = new StringBuffer();

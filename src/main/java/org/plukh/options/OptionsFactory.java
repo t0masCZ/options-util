@@ -202,7 +202,7 @@ public class OptionsFactory {
                     Option optionAnnotation = getter.getAnnotation(Option.class);
 
                     if (optionAnnotation != null && optionAnnotation.transientOption()) {
-                        option = new NonConvertableOption();
+                        option = new NonConvertibleOption();
                     } else {
                         throw e;
                     }
@@ -294,7 +294,7 @@ public class OptionsFactory {
 
         option.setKey(annotation.key().isEmpty() ? getPropertyName(getter, true) : annotation.key());
         //Ignore default value for non-convertible options
-        if (!(option instanceof NonConvertableOption) && (!annotation.defaultValue().isEmpty())) {
+        if (!(option instanceof NonConvertibleOption) && (!annotation.defaultValue().isEmpty())) {
             option.setDefaultValue(annotation.defaultValue());
         }
         option.setTransient(annotation.transientOption());
