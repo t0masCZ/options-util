@@ -1,2 +1,9 @@
 /.idea/workspace.xml
 /target
+*.iml
+.idea/*.xml
+.idea/.name
+.idea/scopes
+.idea/runConfigurations
+.idea/inspectionProfiles
+.idea/libraries
