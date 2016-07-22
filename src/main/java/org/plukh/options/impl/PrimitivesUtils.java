@@ -4,12 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-/**
- * Created by t0mas on 20.7.16.
- */
 public class PrimitivesUtils {
     private final static Map<Class<?>, Function<String, Object>> CLASS_TO_CONVERTER = new HashMap<>();
     private static final Map<Class<?>, Class<?>> PRIMITIVES_TO_WRAPPERS = new HashMap<>();
+    private static final Map<Class, Object> DEFAULT_PRIMITIVE_VALUES = new HashMap<>();
 
     static {
         CLASS_TO_CONVERTER.put(Boolean.class, Boolean::parseBoolean);
@@ -36,6 +34,15 @@ public class PrimitivesUtils {
         PRIMITIVES_TO_WRAPPERS.put(Long.TYPE, Long.class);
         PRIMITIVES_TO_WRAPPERS.put(Short.TYPE, Short.class);
         PRIMITIVES_TO_WRAPPERS.put(Void.TYPE, Void.TYPE);
+
+        DEFAULT_PRIMITIVE_VALUES.put(byte.class, (byte) 0);
+        DEFAULT_PRIMITIVE_VALUES.put(short.class, (short) 0);
+        DEFAULT_PRIMITIVE_VALUES.put(int.class, 0);
+        DEFAULT_PRIMITIVE_VALUES.put(long.class, 0L);
+        DEFAULT_PRIMITIVE_VALUES.put(float.class, 0.0f);
+        DEFAULT_PRIMITIVE_VALUES.put(double.class, 0.0d);
+        DEFAULT_PRIMITIVE_VALUES.put(boolean.class, Boolean.FALSE);
+        DEFAULT_PRIMITIVE_VALUES.put(char.class, '\u0000');
     }
 
     public static Function<String, Object> getStringConverter(Class<?> paramTypeToCreate) {
@@ -48,5 +55,9 @@ public class PrimitivesUtils {
             convertedClass = (Class)PRIMITIVES_TO_WRAPPERS.get(cls);
         }
         return convertedClass;
+    }
+
+    static Object getDefaultValue(Class<?> cls) {
+        return DEFAULT_PRIMITIVE_VALUES.get(cls);
     }
 }

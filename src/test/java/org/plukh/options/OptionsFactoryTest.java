@@ -67,17 +67,20 @@ public class OptionsFactoryTest {
         PrimitiveGettersTestOptions options = OptionsFactory.getOptionsInstance(PrimitiveGettersTestOptions.class);
 
         try {
-            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(boolean.class), options.getBoolean());
-            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(int.class), options.getIntPrimitive());
-            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(Integer.class), options.getInt());
-            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(short.class), options.getShortPrimitive());
-            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(Short.class), options.getShort());
-            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(long.class), options.getLongPrimitive());
-            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(Long.class), options.getLong());
-            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(float.class), options.getFloatPrimitive());
-            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(Float.class), options.getFloat());
-            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(byte.class), options.getBytePrimitive());
-            assertEquals(OptionsProxyHandler.DEFAULT_PRIMITIVE_VALUES.get(Byte.class), options.getByte());
+            assertEquals(false, options.getBooleanPrimitive());
+            assertEquals(null, options.getBoolean());
+            assertEquals(0, options.getIntPrimitive());
+            assertEquals(null, options.getInt());
+            assertEquals(0, options.getShortPrimitive());
+            assertEquals(null, options.getShort());
+            assertEquals(0, options.getLongPrimitive());
+            assertEquals(null, options.getLong());
+            assertEquals(0f, options.getFloatPrimitive());
+            assertEquals(null, options.getFloat());
+            assertEquals(0, options.getBytePrimitive());
+            assertEquals(null, options.getByte());
+            assertEquals(0f, options.getDoublePrimitive());
+            assertEquals(null, options.getDouble());
 
         } catch (NullPointerException e) {
             e.printStackTrace();

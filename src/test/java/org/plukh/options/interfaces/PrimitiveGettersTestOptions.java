@@ -25,7 +25,9 @@ public interface PrimitiveGettersTestOptions extends Options  {
     @Option(readOnly = true)
     Integer getInt();
     @Option(readOnly = true)
-    boolean getBoolean();
+    boolean getBooleanPrimitive();
+    @Option(readOnly = true)
+    Boolean getBoolean();
     @Option(readOnly = true)
     short getShortPrimitive();
     @Option(readOnly = true)
@@ -42,4 +44,8 @@ public interface PrimitiveGettersTestOptions extends Options  {
     byte getBytePrimitive();
     @Option(readOnly = true)
     Byte getByte();
+    @Option(readOnly = true)
+    float getDoublePrimitive();
+    @Option(readOnly = true)
+    Float getDouble();
 }

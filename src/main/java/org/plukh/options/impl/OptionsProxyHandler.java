@@ -34,19 +34,6 @@ public class OptionsProxyHandler implements InvocationHandler, Options, Persiste
     private Map<Method, Method> methodsMapping;
     private Map<Method, AbstractOption> getters;
     private Map<Method, AbstractOption> setters;
-
-    public static final Map<Class, Object> DEFAULT_PRIMITIVE_VALUES = new HashMap<>();
-    static {
-        DEFAULT_PRIMITIVE_VALUES.put(byte.class, (byte) 0);
-        DEFAULT_PRIMITIVE_VALUES.put(short.class, (short)0);
-        DEFAULT_PRIMITIVE_VALUES.put(int.class, 0);
-        DEFAULT_PRIMITIVE_VALUES.put(long.class, 0L);
-        DEFAULT_PRIMITIVE_VALUES.put(float.class, 0.0f);
-        DEFAULT_PRIMITIVE_VALUES.put(double.class, 0.0d);
-        DEFAULT_PRIMITIVE_VALUES.put(boolean.class, Boolean.FALSE);
-        DEFAULT_PRIMITIVE_VALUES.put(char.class, '\u0000');
-    }
-
     private PersistenceProvider persistenceProvider;
 
     public OptionsProxyHandler(Map<Method, AbstractOption> getters, Map<Method, AbstractOption> setters, PersistenceProvider persistenceProvider) throws NoSuchMethodException {
@@ -77,8 +64,7 @@ public class OptionsProxyHandler implements InvocationHandler, Options, Persiste
     }
 
     private synchronized Object getValue(AbstractOption option, Class type) {
-        return option.getValue() == null && DEFAULT_PRIMITIVE_VALUES.containsKey(type) ?
-                DEFAULT_PRIMITIVE_VALUES.get(type) : option.getValue();
+        return  option.getValue() != null ? option.getValue() : PrimitivesUtils.getDefaultValue(type);
     }
 
     private synchronized void setValue(AbstractOption option, Object value) {
