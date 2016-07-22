@@ -95,7 +95,7 @@ public class CollectionOption extends AbstractOption {
 
         AbstractOption option;
         try {
-            option = AbstractOption.getOptionForClass(getOptionClass());
+            option = OptionFactory.getOptionForClass(getOptionClass());
         } catch (UnsupportedOptionClassException e) {
             throw new IllegalArgumentException("Collection element class is unsupported, weird: " + getOptionClass().getName());
         } catch (IllegalAccessException | InstantiationException e) {

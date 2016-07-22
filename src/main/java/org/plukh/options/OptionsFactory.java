@@ -17,7 +17,6 @@
 package org.plukh.options;
 
 import org.plukh.options.impl.OptionsProxyHandler;
-import org.plukh.options.impl.collections.OptionsQueue;
 import org.plukh.options.impl.options.*;
 import org.plukh.options.impl.persistence.TransientPersistenceProvider;
 
@@ -44,11 +43,6 @@ public class OptionsFactory {
     private static final int GROUP_PREFIX = 1;
 
     private static final Pattern VALID_KEY_PATTERN = Pattern.compile("^[a-zA-Z0-9_\\-.]+");
-
-    static {
-        registerStandardOptionTypes();
-        registerStandardCollectionTypes();
-    }
 
     private final static Map<Class<? extends Options>, Options> instancesCache = new HashMap<>();
 
@@ -249,7 +243,7 @@ public class OptionsFactory {
 
         //See if user had specified a backing collection class
         if (collectionAnnotation.backingClass().equals(AbstractCollection.class)) {
-            return AbstractOption.getCollectionOption(collectionAnnotation.elementClass(), getter.getReturnType());
+            return CollectionOptionFactory.getCollectionOption(collectionAnnotation.elementClass(), getter.getReturnType());
         }
 
         //Validate backing class
@@ -260,12 +254,12 @@ public class OptionsFactory {
                     " doesn't have a public default constructor");
         }
 
-        return AbstractOption.getCollectionOption(collectionAnnotation.elementClass(), getter.getReturnType(), collectionAnnotation.backingClass());
+        return CollectionOptionFactory.getCollectionOption(collectionAnnotation.elementClass(), getter.getReturnType(), collectionAnnotation.backingClass());
     }
 
     private static AbstractOption instantiateScalarOption(Method getter) throws UnsupportedOptionClassException,
             InstantiationException, IllegalAccessException {
-        return AbstractOption.getOptionForClass(getter.getReturnType());
+        return OptionFactory.getOptionForClass(getter.getReturnType());
     }
 
     private static Character validateKey(String key) {
@@ -350,17 +344,5 @@ public class OptionsFactory {
         synchronized (instancesCache) {
             instancesCache.clear();
         }
-    }
-
-    private static void registerStandardOptionTypes() {
-        AbstractOption.registerOptionClassForType(Boolean.class, BooleanOption.class);
-        AbstractOption.registerOptionClassForType(String.class, StringOption.class);
-        AbstractOption.registerOptionClassForType(Date.class, DateOption.class);
-
-        AbstractOption.registerOptionClassForType(Number.class, NumberOption.class);
-    }
-
-    private static void registerStandardCollectionTypes() {
-        AbstractOption.registerCollectionOptionClassForType(Queue.class, OptionsQueue.class);
     }
 }

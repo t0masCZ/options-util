@@ -43,9 +43,9 @@ public class AbstractOptionTest {
 
     @Before
     public void setUp() throws Exception {
-        integerOption = AbstractOption.getOptionForClass(Integer.class);
-        booleanOption = AbstractOption.getOptionForClass(Boolean.class);
-        stringOption = AbstractOption.getOptionForClass(String.class);
+        integerOption = OptionFactory.getOptionForClass(Integer.class);
+        booleanOption = OptionFactory.getOptionForClass(Boolean.class);
+        stringOption = OptionFactory.getOptionForClass(String.class);
     }
 
     @Test

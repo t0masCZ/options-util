@@ -17,13 +17,7 @@
 package org.plukh.options.impl.options;
 
 import org.plukh.options.ParseException;
-import org.plukh.options.UnsupportedOptionClassException;
-import org.plukh.options.impl.PrimitivesUtils;
-import org.plukh.options.impl.collections.CollectionBackedOption;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import static java.text.MessageFormat.format;
@@ -34,13 +28,10 @@ import static java.text.MessageFormat.format;
  * Additionally, it is recommended that implementations override {@link #setValue(Object)} method to ensure that the object
  * passed is one of the applicable classes (see existing implementations for details), but this is not a strict requirement.
  * <p/>
- * Option classes extending {@code AbstractOption} should be registered via {@link #registerOptionClassForType(Class, Class)}
+ * Option classes extending {@code AbstractOption} should be registered via {@link OptionFactory#registerOptionClassForType(Class, Class)}
  * calls for all supported value classes.
  */
 public abstract class AbstractOption {
-    private static final Map<Class, Class<? extends AbstractOption>> OPTION_CLASSES = new HashMap<>();
-    private static final Map<Class<? extends Collection>, Class<? extends CollectionBackedOption>> COLLECTION_CLASSES = new HashMap<>();
-
     protected String key;
     private String stringValue;
     protected Object value;
@@ -247,79 +238,13 @@ public abstract class AbstractOption {
         this.readOnly = readOnly;
     }
 
-    /**
-     * Returns an option instance supporting a specific class.
-     * @param clazz class for which to return an option.
-     * @return an option instance supporting the parameter class.
-     * @throws UnsupportedOptionClassException if {@code clazz} is not supported by any of registered option classes.
-     * @throws IllegalAccessException, InstantiationException if there is an error instantiating option class.
-     */
-    public static AbstractOption getOptionForClass(Class<?> clazz) throws UnsupportedOptionClassException, IllegalAccessException, InstantiationException {
-        clazz = PrimitivesUtils.primitiveToWrapper(clazz);
-
-        Class<? extends AbstractOption> optionClass = OPTION_CLASSES.get(clazz);
-
-        if (optionClass == null) {
-            for (Class<?> clazzFor: OPTION_CLASSES.keySet()) {
-                if (clazzFor.isAssignableFrom(clazz)) {
-                    optionClass = OPTION_CLASSES.get(clazzFor);
-                }
-            }
-        }
-
-        if (optionClass == null) {
-            throw new UnsupportedOptionClassException(format("There is no supported option class for {0}", clazz.getName()));
-        }
-        try {
-            return optionClass.newInstance();
-        } catch (Exception e) {
-            try {
-                return optionClass.getConstructor(Class.class).newInstance(clazz);
-            } catch (Exception e1) {
-                throw e;
-            }
-        }
-    }
-
-    public static CollectionOption getCollectionOption(Class elementClass, Class collectionClass) throws UnsupportedOptionClassException {
-        Class optionCollectionClass = COLLECTION_CLASSES.get(collectionClass);
-        if (optionCollectionClass == null) {
-            throw new UnsupportedOptionClassException(format("There is no supported options collection class for {0}", collectionClass.getName()));
-        }
-        return collectionClass.isInterface() ? new CollectionOption(elementClass, optionCollectionClass) :
-                                               new CollectionOption(collectionClass, elementClass, optionCollectionClass, collectionClass);
-    }
-
-    public static CollectionOption getCollectionOption(Class elementClass, Class collectionClass, Class backingClass) throws UnsupportedOptionClassException {
-        Class optionCollectionClass = COLLECTION_CLASSES.get(collectionClass);
-        if (optionCollectionClass == null) {
-            throw new UnsupportedOptionClassException(format("There is no supported options collection class for {0}", collectionClass.getName()));
-        }
-        return new CollectionOption(collectionClass, elementClass, optionCollectionClass, backingClass);
-    }
-
-    /**
-     * Registers a new option implementation supporting a specific value class. If implementation supports multiple
-     * different classes, this method can be called multiple times.
-     * @param dataTypeClass class of option's value supported by this option implementation.
-     * @param optionClass class of the option's implementation.
-     */
-    public static void registerOptionClassForType(Class dataTypeClass, Class<? extends AbstractOption> optionClass) {
-        OPTION_CLASSES.put(dataTypeClass, optionClass);
-    }
-
-    public static void registerCollectionOptionClassForType(Class <? extends Collection> collectionClass,
-                                                            Class<? extends CollectionBackedOption> optionCollectionClass) {
-        COLLECTION_CLASSES.put(collectionClass, optionCollectionClass);
-    }
-
     public boolean isDefaultValueSet() {
         return defaultValueSet;
     }
 
     boolean isValidOptionClass(Class clazz) {
         try {
-            getOptionForClass(clazz);
+            OptionFactory.getOptionForClass(clazz);
             return true;
         } catch (Exception e) {
             return false;
